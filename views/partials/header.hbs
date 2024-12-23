@@ -49,30 +49,40 @@
                 });
 
                 function handleSearch(page = 1) {
-                    document.getElementById('genre-filter').value = 'none';
-                    document.getElementById('age-filter').value = 'none';
-                    document.getElementById('rating-filter').value = 'none';
-                    document.getElementById('country-filter').value = 'none';
+                    // Get the current URL
+                    const currentPath = window.location.href;
+
+                    if (currentPath.includes('/movies')) {
+                        const typeFilter = document.getElementById('type-filter');
+                        if (typeFilter) typeFilter.value = 'none';
+                        const genreFilter = document.getElementById('genre-filter');
+                        if (genreFilter) genreFilter.value = 'none';
+                        const ageFilter = document.getElementById('age-filter');
+                        if (ageFilter) ageFilter.value = 'none';
+                        const ratingFilter = document.getElementById('rating-filter');
+                        if (ratingFilter) ratingFilter.value = 'none';
+                        const countryFilter = document.getElementById('country-filter');
+                        if (countryFilter) countryFilter.value = 'none';
+                    }
 
                     const queryParams = new URLSearchParams();
                     queryParams.append('keyword', searchField.value.trim());
                     if (page != 1) queryParams.append('page', page);
 
-                    document.getElementById('search-field').value = null; // Clear the search field
-                    // Get the current URL
-                    const currentPath = window.location.href;
+
                     let searchUrl = '';
 
                     // Determine the URL structure based on the current path
                     if (!currentPath.includes('/movies')) {
                         searchUrl = `${currentPath}movies?${queryParams.toString()}`;
                         form.action = searchUrl;
+                        console.log(form.action);
                         form.submit(); // Submit the form to navigate to the search page
+                        document.getElementById('search-field').value = null; // Clear the search field
                     } else {
                         searchUrl = queryParams.toString() ? `${window.location.pathname}?${queryParams.toString()}` : window.location.pathname;
-
                         window.history.pushState({ path: searchUrl }, '', searchUrl);
-
+                        document.getElementById('search-field').value = null; // Clear the search field
                         // Fetch and update the movie list dynamically
                         fetch(`/api${searchUrl}`)
                             .then(response => response.json())
@@ -90,6 +100,7 @@
                         `;
                             });
                     }
+
                 }
 
                 function renderMovies(movies) {
