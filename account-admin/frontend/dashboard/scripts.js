@@ -13,7 +13,7 @@ const initializePieChart = (data) => {
                 label: "Dashboard Data",
                 data: data, // Giá trị từ API
                 backgroundColor: [
-                    "#ff9800", // Màu phần Total Tickets
+                    "#4caf50", // Màu phần Total Tickets
                     "#4caf50", // Màu phần User Growth
                     "#f44336", // Màu phần Total Revenue
                 ],
