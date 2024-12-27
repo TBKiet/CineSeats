@@ -11,6 +11,7 @@ const movieRouter = require("./components/movies/movies.routes");
 const homeRouter = require("./components/home/home.routes");
 const userRouter = require("./components/auth/auth.routes");
 const profileRouter = require("./components/profile/profile.routes");
+const adminRouter = require('./components/admin/admin.routes');
 
 const movieDBConnection = require('./config/movieDBConnection');
 const userDBConnection = require('./config/userDBConnection');
@@ -80,6 +81,7 @@ app.set("view engine", "hbs");
 app.use((req, res, next) => {
     res.locals.isAuthenticated = req.isAuthenticated();
     res.locals.username = req.user ? req.user.username : null;
+    res.locals.user = req.user ? req.user.toObject ? req.user.toObject() : { ...req.user } : null; // Convert user to plain object
     next();
 });
 
@@ -97,6 +99,7 @@ app.get("/contact", (req, res) => {
     res.render("contact", { layout: "main" });
 });
 
+app.use('/admin', adminRouter);
 
 
 app.listen(PORT, () => {

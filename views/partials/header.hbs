@@ -184,12 +184,22 @@
             });
         </script>
 
+        {{!-- Authentication buttons --}}
         {{#if isAuthenticated}}
-        <a href="/logout"><button class="nav-button" type="submit">Log Out</button></a>
+        {{#if (eq user.role "admin")}}
+        <a href="/admin/dashboard">
+            <button class="nav-button" type="button">Admin</button>
+        </a>
         {{else}}
-        <a href="/login"><button class="nav-button" type="submit">Sign In</button></a>
+        <a href="/logout">
+            <button class="nav-button" type="button">Logout</button>
+        </a>
+        {{/if}}
+        {{else}}
+        <a href="/login">
+            <button class="nav-button" type="submit">Sign In</button>
+        </a>
         {{/if}}
     </div>
-
 </nav>
 </header>

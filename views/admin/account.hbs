@@ -1,0 +1,205 @@
+<section>
+    <div class="d-flex">
+        {{> sidebar}}
+        <div class="content col-md-10">
+            <div class="content">
+                <h1>Account Management</h1>
+
+                <div class="container-admin">
+                    <div class="filter-options d-flex justify-content-between">
+                        <div>
+                            <input type="text" id="filter-username" placeholder="Search by username..." class="filter"
+                                style="width: 190px;">
+                            <input type="text" id="filter-email" placeholder="Search by email..." class="filter"
+                                style="width: 190px;">
+                            <button id="search-button">Search</button>
+                        </div>
+
+                        <div>
+                            <label for="role">Role:</label>
+                            <select id="role" class="filter">
+                                <option value="all">All</option>
+                                <option value="user">User</option>
+                                <option value="admin">Admin</option>
+                                <option value="employee">Employee</option>
+                            </select>
+
+                            <label for="sort">Sort by:</label>
+                            <select id="sort-by" class="filter" style="width: 150px;">
+                                <option value="none">None</option>
+                                <option value="username">Username</option>
+                                <option value="email">Email</option>
+                            </select>
+
+                            <select id="sort-order" class="filter">
+                                <option value="asc">Ascending</option>
+                                <option value="desc">Descending</option>
+                            </select>
+
+                            <button id="filter-button">Filter</button>
+                        </div>
+                    </div>
+                    <br>
+                    <!-- Bảng hiển thị danh sách người dùng -->
+                    <div style="overflow-y: auto; max-height: 500px;">
+                        <table id="user-db" class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Phone</th>
+                                    <th>Is Blocked</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{#each users}}
+                                <tr>
+                                    <td>{{this.name}}</td>
+                                    <td>{{this.email}}</td>
+                                    <td>{{this.role}}</td>
+                                    <td>{{this.phone}}</td>
+                                    <td>{{this.isActive}}</td>
+                                    <td>
+                                        <button class="btn btn-danger btn-sm block-btn"
+                                            data-id="{{this._id}}">Block</button>
+                                        <button class="btn btn-success btn-sm unblock-btn"
+                                            data-id="{{this._id}}">Unblock</button>
+                                        <button class="btn btn-danger btn-sm delete-btn"
+                                            data-id="{{this._id}}">Delete</button>
+                                    </td>
+                                </tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {{!-- <div class="actions">
+                        <button id="select-all-btn">Select All</button>
+                    </div> --}}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // Fetch users with optional filters
+        const fetchUsers = async (filters = {}) => {
+            const params = new URLSearchParams(filters);
+            const response = await fetch(`/admin/users?${params.toString()}`);
+            if (response.ok) {
+                const { users } = await response.json();
+                populateUserTable(users);
+            } else {
+                console.error("Error fetching users.");
+            }
+        };
+
+        // Populate the user table
+        const populateUserTable = (users) => {
+            const tbody = document.querySelector("#user-db tbody");
+            tbody.innerHTML = ""; // Clear existing rows
+
+            users.forEach((user) => {
+                const row = `
+                <tr>
+                    <td>${user.username}</td>
+                    <td>${user.email}</td>
+                    <td>${user.role}</td>
+                    <td>${user.phone}</td>
+                    <td>${user.isActive}</td>
+                    <td>
+                        <button class="block-btn btn btn-danger btn-sm" data-id="${user._id}">Block</button>
+                        <button class="unblock-btn btn btn-success btn-sm" data-id="${user._id}">Unblock</button>
+                        <button class="delete-btn btn btn-danger btn-sm" data-id="${user._id}">Delete</button>
+                    </td>
+                </tr>
+            `;
+                tbody.insertAdjacentHTML("beforeend", row);
+            });
+
+            // Reassign event listeners after updating the table
+            assignActionListeners();
+        };
+
+        // Assign event listeners for block, unblock, and delete buttons
+        const assignActionListeners = () => {
+            // Block a user
+            document.querySelectorAll(".block-btn").forEach((button) => {
+                button.addEventListener("click", async () => {
+                    const userId = button.dataset.id;
+                    const response = await fetch(`/admin/users/${userId}/block`, { method: "PATCH" });
+                    if (response.ok) {
+                        alert("User has been blocked.");
+                        fetchUsers(); // Refresh the table
+                    } else {
+                        alert("Error blocking user.");
+                    }
+                });
+            });
+
+            // Unblock a user
+            document.querySelectorAll(".unblock-btn").forEach((button) => {
+                button.addEventListener("click", async () => {
+                    const userId = button.dataset.id;
+                    const response = await fetch(`/admin/users/${userId}/unblock`, { method: "PATCH" });
+                    if (response.ok) {
+                        alert("User has been unblocked.");
+                        fetchUsers(); // Refresh the table
+                    } else {
+                        alert("Error unblocking user.");
+                    }
+                });
+            });
+
+            // Delete a user
+            document.querySelectorAll(".delete-btn").forEach((button) => {
+                button.addEventListener("click", async () => {
+                    const userId = button.dataset.id;
+                    const response = await fetch(`/admin/users/${userId}`, { method: "DELETE" });
+                    if (response.ok) {
+                        alert("User has been deleted.");
+                        fetchUsers(); // Refresh the table
+                    } else {
+                        alert("Error deleting user.");
+                    }
+                });
+            });
+        };
+
+        // Search button logic
+        document.getElementById("search-button").addEventListener("click", () => {
+            const username = document.getElementById("filter-username").value.trim();
+            const email = document.getElementById("filter-email").value.trim();
+
+            // Only send `username` and `email` for search
+            const filters = {};
+            if (username) filters.username = username;
+            if (email) filters.email = email;
+
+            fetchUsers(filters);
+        });
+
+        // Filter button logic
+        document.getElementById("filter-button").addEventListener("click", () => {
+            const sortBy = document.getElementById("sort-by").value;
+            const sortOrder = document.getElementById("sort-order").value;
+            const role = document.getElementById("role").value;
+
+            // Only send sorting and role for filters
+            const filters = {};
+            if (sortBy && sortBy !== "none") filters.sortBy = sortBy;
+            if (sortOrder) filters.sortOrder = sortOrder;
+            if (role && role !== "all") filters.role = role;
+
+            fetchUsers(filters);
+        });
+
+        // Initial load (fetch all users)
+        fetchUsers();
+    });
+
+</script>

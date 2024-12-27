@@ -1,0 +1,78 @@
+<section>
+    <div class="body-login-register">
+        <div class="form-container">
+            <p class="title">Reset password</p>
+            <form class="form" action="/reset-password" method="POST">
+                <input type="password" class="input" name="password" placeholder="Password" required />
+                <p id="password-feedback" style="display: none; margin-top: 5px;"></p>
+                <input type="password" class="input" name="re_password" placeholder="Confirm Password" required />
+                <p id="re-password-feedback" style="display: none; margin-top: 5px;"></p>
+                <button class="form-btn" type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        function passwordStrength(password) {
+            if (password.length < 8) return 0;
+            const hasUpperCase = /[A-Z]/.test(password);
+            const hasLowerCase = /[a-z]/.test(password);
+            const hasNumbers = /\d/.test(password);
+            const hasNonalphas = /\W/.test(password);
+            let strength = 0;
+            if (hasUpperCase) strength++;
+            if (hasLowerCase) strength++;
+            if (hasNumbers) strength++;
+            if (hasNonalphas) strength++;
+            return strength;
+        }
+        let checkPassword = false;
+        document.querySelector('input[name="password"]').addEventListener('input', (e) => {
+            const password = e.target.value;
+            const feedbackElement = document.getElementById('password-feedback');
+            const strength = passwordStrength(password);
+            if (strength === 0) {
+                feedbackElement.textContent = "Password must be at least 8 characters long.";
+                feedbackElement.style.color = 'red';
+                feedbackElement.style.display = 'block';
+            } else {
+                // Determine password strength based on the criteria count
+                if (strength === 1) {
+                    feedbackElement.textContent = "Weak. Please improve your password.";
+                    feedbackElement.style.color = 'red';
+                } else if (strength === 2) {
+                    feedbackElement.textContent = "Fair. Your password must be stronger.";
+                    feedbackElement.style.color = 'orange';
+                } else if (strength === 3) {
+                    feedbackElement.textContent = "Good! Your password is strong.";
+                    feedbackElement.style.color = 'yellowgreen';
+                } else if (strength === 4) {
+                    feedbackElement.textContent = "Excellent! Your password is very strong.";
+                    feedbackElement.style.color = 'green';
+                }
+                feedbackElement.style.display = 'block';
+                checkPassword = strength >= 3;
+            }
+        });
+        document.querySelector('input[name="re_password"]').addEventListener('input', (e) => {
+            const confirmPassword = e.target.value;
+            const password = document.querySelector('input[name="password"]').value;
+            const feedbackElement = document.getElementById('re-password-feedback');
+            if (confirmPassword !== password) {
+                feedbackElement.textContent = "Passwords do not match.";
+                feedbackElement.style.color = 'red';
+                feedbackElement.style.display = 'block';
+            } else {
+                feedbackElement.textContent = "Passwords match.";
+                feedbackElement.style.color = 'green';
+                feedbackElement.style.display = 'block';
+            }
+        });
+        document.querySelector('.form').addEventListener('submit', function (event) {
+            if (!checkPassword) {
+                alert('Reset password failed.');
+                event.preventDefault(); // Prevent form submission
+                return;
+            }
+        });
+    </script>
+</section>

@@ -1,0 +1,53 @@
+<section>
+    <div class="d-flex">
+        {{> sidebar}}
+
+        <div class="content">
+            <h1>Dasboard</h1>
+            <p> Hi. Welcome back to CineSeats Admin!</p>
+            <div class="cards">
+                <!-- Total Tickets -->
+                <div class="card-dashboard">
+                    <div class="icon" style="background-color: #ff9800;">
+                        <i class="fa fa-ticket-alt"></i>
+                    </div>
+                    <div class="content-card">
+                        <h3>Total Tickets</h3>
+                        <p id="value-total-tickets">0</p>
+                    </div>
+                </div>
+
+                <!-- Total Users -->
+                <div class="card-dashboard">
+                    <div class="icon" style="background-color: #4caf50;">
+                        <i class="fa fa-user"></i>
+                    </div>
+                    <div class="content-card">
+                        <h3>Total Users</h3>
+                        <p id="value-total-users">0</p>
+                    </div>
+                </div>
+
+                <!-- Total Revenue -->
+                <div class="card-dashboard">
+                    <div class="icon" style="background-color: #f44336;">
+                        <i class="fa fa-dollar-sign"></i>
+                    </div>
+                    <div class="content-card">
+                        <h3>Total Revenue</h3>
+                        <p id="value-total-revenue">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="pieChart"></canvas>
+            </div>
+
+        </div>
+    </div>
+
+    {{!--
+    <script src="./dashboard.js"> </script> --}}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</section>
