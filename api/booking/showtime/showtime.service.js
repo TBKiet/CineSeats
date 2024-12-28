@@ -4,8 +4,8 @@ const { Op } = require('sequelize');
 async function getShowtimes(movieId, date, city) {
     try {
         console.time('Redis'); // Start timing
-        const uniqueDatesCacheKey = `uniqueDates:`; // Adjust if uniqueDates is context-specific
-        const uniqueCityCacheKey = `uniqueCity`; // Adjust if uniqueCity is context-specific
+        const uniqueDatesCacheKey = `uniqueDates:all`; // Adjust if uniqueDates is context-specific
+        const uniqueCityCacheKey = `uniqueCity:all`; // Adjust if uniqueCity is context-specific
 
         // Fetch uniqueDates with caching
 
