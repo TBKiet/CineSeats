@@ -65,6 +65,12 @@
                         if (countryFilter) countryFilter.value = 'none';
                     }
 
+
+                    const urlParams = new URLSearchParams(window.location.search);
+
+                    const keyword = urlParams.get('keyword');
+                    if (keyword)
+                        searchField.value = keyword;
                     const queryParams = new URLSearchParams();
                     queryParams.append('keyword', searchField.value.trim());
                     if (page != 1) queryParams.append('page', page);
