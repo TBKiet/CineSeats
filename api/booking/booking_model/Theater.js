@@ -2,13 +2,16 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../../../config/cineseatsDBConnection');
 
 const Theater = sequelize.define('Theater', {
-    theaterId: {
+    theaterID: {
         field: 'TheaterID',
         type: DataTypes.STRING(10),
         primaryKey: true,
-        allowNull: false
+        allowNull: false,
+        validate: {
+            notEmpty: true,
+        }
     },
-    name: {
+    theaterName: {
         field: 'TheaterName',
         type: DataTypes.STRING(100),
         allowNull: false
@@ -27,5 +30,6 @@ const Theater = sequelize.define('Theater', {
     tableName: 'Theaters',
     timestamps: false
 });
+
 
 module.exports = Theater;
