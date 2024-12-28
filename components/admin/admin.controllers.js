@@ -1,4 +1,4 @@
-const { User } = require("../account/account.model");
+const { User, getTotalUsers } = require("../account/account.model");
 const Movie = require("../movies/movies.model");
 const mongoose = require("mongoose");
 const { cloudinary } = require('../cloudinary/config/cloud'); // Import config của Cloudinary
@@ -284,6 +284,19 @@ const deleteMovie = async (req, res) => {
   }
 };
 
+const getTotalUsersCount = async (req, res) => {
+  try {
+    if (!req.isAuthenticated()) {
+      return res.status(401).send("Unauthorized");
+    }
+    const totalUsers = await getTotalUsers(); // Call the model function to get the count
+    res.json({ totalUsers }); // Send the total user count in the response
+  } catch (error) {
+    console.error("Error fetching total users:", error);
+    res.status(500).send("Error fetching total users");
+  }
+};
+
 module.exports = {
   //render
   renderAccount,
@@ -294,6 +307,7 @@ module.exports = {
   blockUser,
   unblockUser,
   getFilteredAndSortedUsers,
+  getTotalUsersCount,
   //movie
   createMovie,
   getMovieById,

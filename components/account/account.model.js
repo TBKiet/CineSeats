@@ -50,4 +50,15 @@ const updateUserData = async (userId, updatedData) => {
     return await User.findByIdAndUpdate(userId, updatedData, { new: true });
 }
 
-module.exports = { getUserData, User, updateUserData };
+// Add a method to count the total number of users
+const getTotalUsers = async () => {
+    try {
+        const totalUsers = await User.countDocuments(); // Count all users
+        return totalUsers;
+    } catch (error) {
+        console.error('Error counting users:', error);
+        throw error;
+    }
+};
+
+module.exports = { getUserData, User, updateUserData, getTotalUsers };
