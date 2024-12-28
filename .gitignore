@@ -4,8 +4,6 @@
 # Ignore node_modules folder
 node_modules/
 .idea/
-# Ignore .env file (used for environment variables)
-.env
 
 # Ignore all files with .temp extension
 *.temp
