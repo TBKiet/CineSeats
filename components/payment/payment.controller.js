@@ -192,9 +192,9 @@ exports.vnpayIPN = async function (req, res, next) {
             }
 
             // Step 7: Check if the amount matches
-            let vnpAmount = parseInt(vnp_Params['vnp_Amount'], 10); // Amount in VND, e.g., 1000000
-            let expectedAmount = booking.totalAmount * 1000; // Assuming totalAmount is in thousand VND
-
+            let vnpAmount = parseInt(vnp_Params['vnp_Amount'], 10) / 100; // Amount in VND, e.g., 1000000
+            let expectedAmount = parseInt(booking.totalAmount); // Assuming totalAmount is in thousand VND
+            console.log(vnpAmount, expectedAmount);
             let checkAmount = (vnpAmount === expectedAmount);
 
             if (!checkAmount) {
