@@ -11,13 +11,16 @@ const movieRouter = require("./components/movies/movies.routes");
 const homeRouter = require("./components/home/home.routes");
 const userRouter = require("./components/auth/auth.routes");
 const profileRouter = require("./components/profile/profile.routes");
+const bookingRouter = require("./components/booking/booking.routes");
+const paymentRouter = require("./components/payment/payment.routes");
 
 const movieDBConnection = require('./config/movieDBConnection');
 const userDBConnection = require('./config/userDBConnection');
 const cineseatsDBConnection = require('./config/cineseatsDBConnection');
 
 const apiMoviesRouter = require('./api/movies/movies.routes');
-const apiShowtimeRouter = require('./api/showtime/showtime.routes');
+const apiShowtimeRouter = require('./api/booking/showtime/showtime.routes');
+const apiBookingRouter = require('./api/booking/booking/booking.routes');
 
 const app = express();
 const PORT = 3000;
@@ -30,6 +33,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/movies', apiMoviesRouter);
 app.use('/api/showtime', apiShowtimeRouter);
+app.use('/api/booking', apiBookingRouter);
 // Set up session middleware with MongoDB store
 app.use(session({
     secret: process.env.SESSION_SECRET, // Replace with your own secret
@@ -70,6 +74,14 @@ app.engine(
                 }
                 return range;
             },
+            padZero: (number) => {
+                return number < 10 ? '0' + number : number;
+            },
+            assignSeatId: (index) => {
+                if (index == 3 || index == 4) return 'seat-top-left';
+                if (index == 8) return 'seat-bottom-right';
+                return '';
+            }
         },
     })
 );
@@ -88,6 +100,8 @@ app.use("/", userRouter);
 app.use("/", homeRouter);
 app.use("/movies", movieRouter);
 app.use("/profile", profileRouter);
+app.use("/booking", bookingRouter);
+app.use("/payment", paymentRouter);
 
 app.get("/about", (req, res) => {
     res.render("about", { layout: "main" });

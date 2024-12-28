@@ -1,23 +1,25 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../../../config/cineseatsDBConnection');
-const TheaterRoom = require('./TheaterRoom');
 
 const Showtime = sequelize.define('Showtime', {
-    showtimeId: {
+    showtimeID: {
         field: 'ShowtimeID',
         type: DataTypes.STRING(10),
         primaryKey: true,
-        allowNull: false
+        allowNull: false,
+        validate: {
+            notEmpty: true,
+        }
     },
     movieId: {
         field: 'MovieID',
-        type: DataTypes.STRING(40),
-        allowNull: false
+        type: DataTypes.STRING(10),
+        allowNull: false,
     },
-    theaterRoomId: {
+    roomId: {
         field: 'TheaterRoomID',
         type: DataTypes.STRING(10),
-        allowNull: false
+        allowNull: false,
     },
     date: {
         field: 'Date',
@@ -39,11 +41,7 @@ const Showtime = sequelize.define('Showtime', {
     }
 }, {
     tableName: 'Showtimes',
-    timestamps: false
+    timestamps: false // If your table doesn't have `createdAt` and `updatedAt` columns
 });
-
-
-Showtime.belongsTo(TheaterRoom, { foreignKey: 'theaterRoomId' });
-TheaterRoom.hasMany(Showtime, { foreignKey: 'theaterRoomId' });
 
 module.exports = Showtime;

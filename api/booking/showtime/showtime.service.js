@@ -1,25 +1,28 @@
-const Showtime = require('./showtime_model/Showtime');
-const TheaterRoom = require('./showtime_model/TheaterRoom');
-const Theater = require('./showtime_model/Theater');
-const { getCachedData } = require('../../config/redisConnection');
-
+const { Showtime, TheaterRoom, Theater } = require('../booking_model/index')
+const { getCachedData } = require('../../../config/redisConnection');
+const { Op } = require('sequelize');
 async function getShowtimes(movieId, date, city) {
     try {
         console.time('Redis'); // Start timing
-        const uniqueDatesCacheKey = `uniqueDates:all`; // Adjust if uniqueDates is context-specific
-        const uniqueCityCacheKey = `uniqueCity:all`; // Adjust if uniqueCity is context-specific
+        const uniqueDatesCacheKey = `uniqueDates:`; // Adjust if uniqueDates is context-specific
+        const uniqueCityCacheKey = `uniqueCity`; // Adjust if uniqueCity is context-specific
 
         // Fetch uniqueDates with caching
+
         const uniqueDates = await getCachedData(uniqueDatesCacheKey, () =>
             Showtime.findAll({
                 attributes: ['date', 'dayOfWeek'],
-                where: { movieId },
+                where: {
+                    movieId,
+                    date: {
+                        [Op.gte]: new Date(),
+                    },
+                },
                 group: ['date'],
                 order: [['date', 'ASC']],
-                raw: true, // Fetch plain objects to reduce overhead
+                raw: false, // Fetch plain objects to reduce overhead
             })
         );
-
         // Fetch uniqueCity with caching
         const uniqueCity = await getCachedData(uniqueCityCacheKey, () =>
             Theater.findAll({
@@ -32,7 +35,7 @@ async function getShowtimes(movieId, date, city) {
         console.timeEnd('Redis'); // Logs the time taken
         console.time('MySQL'); // Start timing
         const showtimes = await Showtime.findAll({
-            attributes: ['showtimeId', 'movieId', 'theaterRoomId', 'date', 'startTime'],
+            attributes: ['showtimeId', 'movieId', 'roomId', 'date', 'startTime'],
             where: {
                 ...(movieId ? { movieId } : {}),
                 ...(date ? { date } : {}),
@@ -56,7 +59,7 @@ async function getShowtimes(movieId, date, city) {
         // Build {theaters: []} structure
         const theaterMap = {};
         for (const showtime of showtimes) {
-            const { showtimeId, startTime } = showtime;
+            const { showtimeId, date, startTime } = showtime.dataValues;
             const { roomId, roomName, totalSeats, Theater: theater } = showtime.TheaterRoom;
             const { theaterId, theaterName, Location, theaterCity } = theater.dataValues;
             // If theater not mapped yet, create entry
@@ -76,6 +79,7 @@ async function getShowtimes(movieId, date, city) {
             // Append new showtime
             theaterMap[theaterId].showtimes.push({
                 showtimeId,
+                date,
                 startTime: startTime.slice(0, 5), // Extract only HH:MM
                 theaterRoom: {
                     roomId,

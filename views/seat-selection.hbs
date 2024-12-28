@@ -1,267 +1,4 @@
-<!DOCTYPE html>
-<html>
-
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        html,
-        body {
-            overflow-x: hidden;
-            margin: 0;
-            padding: 0;
-            height: 100%;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            padding: 0;
-        }
-
-        .screen-container {
-            position: fixed;
-            margin-top: 30px;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: white;
-            z-index: 10;
-        }
-
-        .screen {
-            width: 90%;
-            height: 80px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .screen::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -5%;
-            width: 110%;
-            height: 200px;
-            border: 3px solid #172a74;
-            border-radius: 50%;
-            background: linear-gradient(180deg, rgba(23, 42, 116, 0.2) 0%, rgba(255, 255, 255, 0) 40%);
-        }
-
-        /* Add padding to theater container to prevent overlap with fixed screen */
-        .theater-container {
-            margin-top: 120px;
-            overflow-x: auto;
-            overflow-y: hidden;
-            padding: 20px;
-            padding-bottom: 100px;
-            /* Add padding to prevent content from being hidden behind the sticky bar */
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .screen-text {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: #47566b;
-            font-size: 1.3rem;
-            white-space: nowrap;
-        }
-
-        .seating-container {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            width: fit-content;
-            margin: 0 auto;
-        }
-
-        .row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            height: 35px;
-            /* Fixed height for consistency */
-        }
-
-        .row-label {
-            color: rgba(0, 0, 0, 0.70);
-            width: 20px;
-            text-align: center;
-            flex-shrink: 0;
-        }
-
-        .seat {
-            width: 35px;
-            height: 25px;
-            background: white;
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            color: black;
-            cursor: pointer;
-            transition: all 0.2s;
-            flex-shrink: 0;
-            border: 1px solid #172a74;
-            /* Prevent seat shrinking */
-        }
-
-        .seat:hover {
-            background: #21a8afce;
-        }
-
-        .seat.selected {
-            background-color: #21a8afce;
-            /* Change to your desired color */
-            color: #fff;
-            /* Optional: change text color for better contrast */
-        }
-
-        .seat.unavailable {
-            background: #47566b;
-            color: #979ca3;
-            cursor: not-allowed;
-        }
-
-        .seat.empty {
-            visibility: hidden;
-        }
-
-        #rectangle {
-            position: absolute;
-            border: 2px solid red;
-            border-radius: 10px;
-        }
-
-        .legend-container {
-            position: fixed;
-            top: 600px;
-            /* Position right below the screen container */
-            left: 0;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            padding: 15px;
-            background: white;
-            z-index: 9;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .legend-box {
-            width: 24px;
-            height: 24px;
-            border-radius: 4px;
-            border: 1px solid #172a74;
-        }
-
-        .legend-box.sold {
-            background-color: #47566b;
-        }
-
-        .legend-box.available {
-            background-color: white;
-        }
-
-        .legend-box.selected {
-            background-color: #21a8afce;
-        }
-
-        .legend-text {
-            font-size: 0.9rem;
-            color: #333;
-            white-space: nowrap;
-        }
-
-        @media screen and (max-width: 600px) {
-            .legend-container {
-                flex-direction: column;
-            }
-
-            .legend-item {
-                justify-content: flex-start;
-            }
-        }
-
-        .sold {
-            background-color: #cccccc;
-        }
-
-        .seat.selected {
-            background-color: #21a8afce;
-        }
-
-        .bottom-rectangle {
-            position: fixed;
-            /* Change from sticky to fixed */
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 80px;
-            background: white;
-            border-top: 2px solid #172a74;
-            border-bottom: 2px solid #172a74;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 40px;
-            box-sizing: border-box;
-            /* Add this to include padding in width calculation */
-        }
-
-        .movie-info {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .movie-title {
-            margin: 0;
-            font-size: 1.2rem;
-            color: #172a74;
-
-        }
-
-        .show-details {
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        .separator {
-            margin: 0 8px;
-        }
-
-        .booking-info {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            text-align: right;
-        }
-
-        .selected-info,
-        .total-price {
-            font-size: 1.2rem;
-            color: #172a74;
-        }
-    </style>
-</head>
-
-<body>
+<section id="seatSection">
     <div class="screen-container">
         <div class="screen">
             <div class="screen-text">Screen</div>
@@ -270,215 +7,23 @@
 
     <div class="theater-container">
         <div class="seating-container">
-            <!-- Row A -->
-            <div class="row">
-                <div class="row-label">A</div>
-                <div class="seat empty"></div>
-                <div class="seat empty"></div>
-                <div class="seat empty"></div>
-                <div class="seat empty"></div>
-                <div class="seat">A01</div>
-                <div class="seat">A02</div>
-                <div class="seat">A03</div>
-                <div class="seat">A04</div>
-                <div class="seat">A05</div>
-                <div class="seat">A06</div>
-                <div class="seat">A07</div>
-                <div class="seat">A08</div>
-                <div class="seat">A09</div>
-                <div class="seat">A10</div>
-                <div class="seat">A11</div>
-                <div class="seat empty"></div>
-                <div class="row-label">A</div>
+            {{#each rows}}
+            <div class="seat-row">
+                <div class="seat-row-label">{{rowLetter}}</div>
+                {{#each seats}}
+                <div class="seat {{status}} {{#if (eq seatVisibility 0)}} invisible{{/if}}" {{#if seatVisibility}}
+                    id="{{assignSeatId @index}}" {{/if}} data-seatId="{{seatID}}">
+                    {{rowLetter}}{{padZero seatNumber}}
+                </div>
+                {{/each}}
             </div>
-
-            <!-- Row B -->
-            <div class="row">
-                <div class="row-label">B</div>
-                <div class="seat empty"></div>
-                <div class="seat">B01</div>
-                <div class="seat">B02</div>
-                <div class="seat">B03</div>
-                <div class="seat">B04</div>
-                <div class="seat">B05</div>
-                <div class="seat">B06</div>
-                <div class="seat">B07</div>
-                <div class="seat">B08</div>
-                <div class="seat">B09</div>
-                <div class="seat">B10</div>
-                <div class="seat">B11</div>
-                <div class="seat">B12</div>
-                <div class="seat">B13</div>
-                <div class="seat">B14</div>
-                <div class="seat empty"></div>
-                <div class="row-label">B</div>
-            </div>
-
-            <div class="row">
-                <div class="row-label">C</div>
-                <div class="seat empty"></div>
-                <div class="seat">C01</div>
-                <div class="seat">C02</div>
-                <div class="seat">C03</div>
-                <div class="seat">C04</div>
-                <div class="seat">C05</div>
-                <div class="seat">C06</div>
-                <div class="seat">C07</div>
-                <div class="seat">C08</div>
-                <div class="seat">C09</div>
-                <div class="seat">C10</div>
-                <div class="seat">C11</div>
-                <div class="seat">C12</div>
-                <div class="seat">C13</div>
-                <div class="seat">C14</div>
-                <div class="seat empty"></div>
-                <div class="row-label">C</div>
-            </div>
-            <div class="row">
-                <div class="row-label">D</div>
-                <div class="seat empty"></div>
-                <div class="seat">D01</div>
-                <div class="seat">D02</div>
-                <div class="seat">D03</div>
-                <div class="seat">D04</div>
-                <div class="seat">D05</div>
-                <div class="seat">D06</div>
-                <div class="seat">D07</div>
-                <div class="seat">D08</div>
-                <div class="seat">D09</div>
-                <div class="seat">D10</div>
-                <div class="seat">D11</div>
-                <div class="seat">D12</div>
-                <div class="seat">D13</div>
-                <div class="seat">D14</div>
-                <div class="seat empty"></div>
-                <div class="row-label">D</div>
-            </div>
-            <div class="row">
-                <div class="row-label">E</div>
-                <div class="seat empty"></div>
-                <div class="seat">E01</div>
-                <div class="seat">E02</div>
-                <div class="seat">E03</div>
-                <div class="seat" id="seat-top-left">E04</div>
-                <div class="seat">E05</div>
-                <div class="seat unavailable">E06</div>
-                <div class="seat unavailable">E07</div>
-                <div class="seat unavailable">E08</div>
-                <div class="seat">E09</div>
-                <div class="seat">E10</div>
-                <div class="seat">E11</div>
-                <div class="seat">E12</div>
-                <div class="seat">E13</div>
-                <div class="seat">E14</div>
-                <div class="seat empty"></div>
-                <div class="row-label">E</div>
-            </div>
-            <div class="row">
-                <div class="row-label">F</div>
-                <div class="seat empty"></div>
-                <div class="seat">F01</div>
-                <div class="seat">F02</div>
-                <div class="seat">F03</div>
-                <div class="seat">F04</div>
-                <div class="seat unavailable">F05</div>
-                <div class="seat unavailable">F06</div>
-                <div class="seat">F07</div>
-                <div class="seat">F08</div>
-                <div class="seat">F09</div>
-                <div class="seat">F10</div>
-                <div class="seat">F11</div>
-                <div class="seat">F12</div>
-                <div class="seat">F13</div>
-                <div class="seat">F14</div>
-                <div class="seat empty"></div>
-                <div class="row-label">F</div>
-            </div>
-            <div class="row">
-                <div class="row-label">G</div>
-                <div class="seat empty"></div>
-                <div class="seat">G01</div>
-                <div class="seat">G02</div>
-                <div class="seat">G03</div>
-                <div class="seat">G04</div>
-                <div class="seat">G05</div>
-                <div class="seat">G06</div>
-                <div class="seat">G07</div>
-                <div class="seat">G08</div>
-                <div class="seat">G09</div>
-                <div class="seat unavailable">G10</div>
-                <div class="seat unavailable" id="seat-bottom-right">G11</div>
-                <div class="seat">G12</div>
-                <div class="seat">G13</div>
-                <div class="seat">G14</div>
-                <div class="seat empty"></div>
-                <div class="row-label">G</div>
-            </div>
-            <div class="row">
-                <div class="row-label">H</div>
-                <div class="seat empty"></div>
-                <div class="seat">H01</div>
-                <div class="seat">H02</div>
-                <div class="seat">H03</div>
-                <div class="seat">H04</div>
-                <div class="seat">H05</div>
-                <div class="seat">H06</div>
-                <div class="seat">H07</div>
-                <div class="seat">H08</div>
-                <div class="seat">H09</div>
-                <div class="seat">H10</div>
-                <div class="seat">H11</div>
-                <div class="seat">H12</div>
-                <div class="seat">H13</div>
-                <div class="seat">H14</div>
-                <div class="seat empty"></div>
-                <div class="row-label">H</div>
-            </div>
-            <div class="row">
-                <div class="row-label">I</div>
-                <div class="seat empty"></div>
-                <div class="seat">I01</div>
-                <div class="seat">I02</div>
-                <div class="seat">I03</div>
-                <div class="seat">I04</div>
-                <div class="seat">I05</div>
-                <div class="seat">I06</div>
-                <div class="seat">I07</div>
-                <div class="seat">I08</div>
-                <div class="seat">I09</div>
-                <div class="seat">I10</div>
-                <div class="seat">I11</div>
-                <div class="seat">I12</div>
-                <div class="seat">I13</div>
-                <div class="seat">I14</div>
-                <div class="seat empty"></div>
-                <div class="row-label">I</div>
-            </div>
-            <div class="row">
-                <div class="row-label">J</div>
-                <div class="seat empty"></div>
-                <div class="seat">J01</div>
-                <div class="seat">J02</div>
-                <div class="seat">J03</div>
-                <div class="seat">J04</div>
-                <div class="seat">J05</div>
-                <div class="seat">J06</div>
-                <div class="seat">J07</div>
-                <div class="seat">J08</div>
-                <div class="seat">J09</div>
-                <div class="seat">J10</div>
-                <div class="seat">J11</div>
-                <div class="seat">J12</div>
-                <div class="seat">J13</div>
-                <div class="seat">J14</div>
-                <div class="seat empty"></div>
-                <div class="row-label">J</div>
-            </div>
+            {{/each}}
         </div>
     </div>
+
     <div class="legend-container">
         <div class="legend-item">
-            <div class="seat"></div>
+            <div class="seat available"></div>
             <span class="legend-text">Ghế thường</span>
         </div>
         <div class="legend-item">
@@ -491,80 +36,269 @@
         </div>
     </div>
     <div id="rectangle"></div>
+
     <div class="bottom-rectangle">
-        <div class="movie-info">
-            <h3 class="movie-title">The Dark Knight</h3>
+        <div class="movie-infos">
+            <h3 class="movie-title">{{name_vn}}</h3>
             <div class="show-details">
-                <span class="theater-name">CGV Aeon Mall</span>
+                <span class="theater-name">{{theaterName}}</span>
                 <span class="separator">•</span>
-                <span class="showtime">Today, 19:30</span>
+                <span class="showtime">{{showtimeDate}}, {{showtimeTime}}</span>
             </div>
         </div>
-        <div class="booking-info">
-            <div class="selected-info">
-                <span>Selected Seats: </span>
-                <span id="selected-seats-display">None</span>
+        <div class="timer-booking-container">
+            <div class="booking-info">
+                <div class="total-price">
+                    <span>Tổng tiền: </span>
+                    <span id="total-price-display">0 đ</span>
+                </div>
+                <button class="book-button">Đặt vé</button>
             </div>
-            <div class="total-price">
-                <span>Total: </span>
-                <span id="total-price-display">$0</span>
+            <div class="timer-container">
+                <span class="timer-label">Thời gian giữ vé:</span>
+                <span class="countdown">5:00</span>
             </div>
         </div>
     </div>
-    <script>
-        const seats = document.querySelectorAll('.seat:not(.unavailable):not(.empty)');
+</section>
 
-        // Add a click event listener to each seat
-        seats.forEach((seat) => {
+<!-- Hidden Payment Section: show after user clicks "Đặt vé" -->
+<section id="paymentSection" style="display: none;">
+    <div class="payment-container">
+        <div class="ticket-preview">
+            <div class="ticket">
+                <div class="left">
+                    <div class="image" style=" background: url({{image}}); background-size: cover;">
+                        <div class="ticket-number"></div>
+                    </div>
+                    <div class="ticket-info">
+                        <p class="date">
+                            <span>{{dayOfWeek}}</span>
+                            <span class="june-29">{{formattedDate}}</span>
+                            <span>{{year}}</span>
+                        </p>
+                        <div class="show-name">
+                            <h1>{{name_vn}}</h1>
+                            {{!-- <h2>Tập đặc biệt 2</h2> --}}
+                        </div>
+                        <div class="time">
+                            <p>Số Vé: <span id="seatCount">0</span></p>
+                            <p>Tổng tiền: <span id="payment-total-price-display">0 đ</span></p>
+                            <p>{{roomName}} <span>|</span> {{showtimeTime}}</p>
+                        </div>
+                        <p class="location">
+                            <span>{{theaterName}}</span>
+                            <span class="separator">
+                                <i class="fa-solid fa-film"></i>
+                            </span>
+                            <span>{{city}}</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="left-section">
+            <div class="promo-section">
+                <h3>Khuyến mãi</h3>
+                <div class="promo-input">
+                    <input type="text" placeholder="Mã khuyến mãi">
+                    <button class="apply-btn">Áp dụng</button>
+                </div>
+            </div>
+            <div class="payment-methods">
+                <h3>Phương thức thanh toán</h3>
+                <div class="payment-options">
+                    <label class="payment-option">
+                        <input type="radio" name="payment" value="MoMo">
+                        <img src="momo-logo.png" alt="MoMo">
+                        <span>Ví Điện Tử MoMo</span>
+                    </label>
+                    <label class="payment-option">
+                        <input type="radio" name="payment" value="VNPAY">
+                        <img src="vnpay-logo.png" alt="VNPAY">
+                        <span>VNPAY</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="action-buttons">
+            <button class="back-btn">
+                <i class="fas fa-arrow-left mr-2"></i> Quay lại
+            </button>
+            <button class="payment-btn">
+                Thanh toán <i class="fas fa-arrow-right ml-2"></i>
+            </button>
+        </div>
+    </div>
+</section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const paymentBtn = document.querySelector('.payment-btn');
+        paymentBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            // Get the selected payment option
+            const selectedPaymentOption = document.querySelector('input[name="payment"]:checked').value;
+            if (selectedPaymentOption === 'VNPAY') {
+                // Create a form element
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/payment/create_payment_url'; // Replace with your actual payment processing endpoint
+
+                // Example: Add necessary hidden inputs
+                const amountText = document.getElementById('payment-total-price-display').innerText;
+                const amount = amountText.replace(/\D/g, ''); // Extract numeric value
+                // Create and append amount input
+                const inputAmount = document.createElement('input');
+                inputAmount.type = 'hidden';
+                inputAmount.name = 'totalAmount';
+                inputAmount.value = amount;
+                form.appendChild(inputAmount);
+                // Create and append paymentMethod input
+                const inputPaymentMethod = document.createElement('input');
+                inputPaymentMethod.type = 'hidden';
+                inputPaymentMethod.name = 'paymentMethod';
+                inputPaymentMethod.value = selectedPaymentOption;
+                form.appendChild(inputPaymentMethod);
+
+                // Create and append selectedSeats input
+                const inputSelectedSeats = document.createElement('input');
+                inputSelectedSeats.type = 'hidden';
+                inputSelectedSeats.name = 'selectedSeats';
+                const seatIDs = selectedSeats.map(seat => seat.seatID);
+                seatIDs.forEach(seatID => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'selectedSeats[]';
+                    input.value = seatID;
+                    form.appendChild(input);
+                });
+
+                // Create and append showtimeId input
+                const inputShowtimeId = document.createElement('input');
+                inputShowtimeId.type = 'hidden';
+                inputShowtimeId.name = 'showtimeId';
+                inputShowtimeId.value = '{{showtimeId}}';
+                form.appendChild(inputShowtimeId);
+
+                // Append the form to the body and submit it
+                document.body.appendChild(form);
+                form.submit();
+            } else {
+                // Handle other payment methods if necessary
+                // For example, redirect to a different payment gateway or submit a different form
+                alert('Chức năng thanh toán cho phương thức này chưa được triển khai.');
+            }
+        });
+        const seatElements = document.querySelectorAll('.seat.available:not(.invisible)');
+        const totalPriceDisplay = document.getElementById('total-price-display');
+        const paymentTotalPriceDisplay = document.getElementById('payment-total-price-display'); // Added
+        const seatPrice = 50;
+        let selectedSeats = [];
+
+        // VND formatter
+        const formatter = new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND',
+            minimumFractionDigits: 0
+        });
+
+        function updateBookingInfo() {
+            const totalPrice = selectedSeats.length * seatPrice * 1000;
+            const formattedPrice = formatter.format(totalPrice);
+            totalPriceDisplay.textContent = formattedPrice; // Pass to bottom rectangle
+            paymentTotalPriceDisplay.textContent = formattedPrice; // Pass to payment section
+        }
+
+        // Toggle seat selection
+        seatElements.forEach(seat => {
             seat.addEventListener('click', () => {
-                seat.classList.toggle('selected');
+                const seatID = seat.getAttribute('data-seatId');
+                const seatText = seat.textContent.trim(); // e.g., "A1"
+                const rowLetter = seatText.charAt(0); // "A"
+                const seatNumber = parseInt(seatText.slice(1), 10); // 1
+
+                if (!seat.classList.contains('selected')) {
+                    // Get all selected seats in the same row
+                    const selectedInRow = selectedSeats.filter(s => s.row === rowLetter);
+                    // Tentatively add the new seat
+                    const newSelectedInRow = [...selectedInRow, { row: rowLetter, number: seatNumber, seatID: seatID }];
+                    // Extract and sort seat numbers
+                    const seatNumbers = newSelectedInRow.map(s => s.number).sort((a, b) => a - b);
+
+                    // Check for single-seat gaps
+                    let hasSingleSeatGap = false;
+                    for (let i = 1; i < seatNumbers.length; i++) {
+                        if (seatNumbers[i] - seatNumbers[i - 1] === 2) {
+                            hasSingleSeatGap = true;
+                            break;
+                        }
+                    }
+
+                    if (hasSingleSeatGap) {
+                        // Prevent selection if a single-seat gap is created
+                        alert('Việc chọn ghế của bạn không được để trống 1 ghế trên cùng một hàng ghế mà bạn vừa chọn.');
+                    } else {
+                        // Allow selection
+                        seat.classList.add('selected');
+                        selectedSeats.push({ row: rowLetter, number: seatNumber, seatID: seatID });
+                    }
+                } else {
+                    // If seat is already selected, allow deselection
+                    seat.classList.remove('selected');
+                    selectedSeats = selectedSeats.filter(s => !(s.row === rowLetter && s.number === seatNumber));
+                }
+
+                updateBookingInfo();
             });
         });
-        document.addEventListener('DOMContentLoaded', function () {
-            function drawRectangle() {
-                const topLeft = document.getElementById('seat-top-left');
-                const bottomRight = document.getElementById('seat-bottom-right');
 
-                if (topLeft && bottomRight) {
-                    const topLeftRect = topLeft.getBoundingClientRect();
-                    const bottomRightRect = bottomRight.getBoundingClientRect();
+        const bookButton = document.querySelector('.book-button');
+        const seatSection = document.getElementById('seatSection');
+        const paymentSection = document.getElementById('paymentSection');
+        const seatCount = document.getElementById('seatCount');
 
-                    // Amount by which to expand the rectangle (in pixels)
-                    const expandBy = 10;
-
-                    // Calculate dimensions including scroll offset and expansion
-                    const rectangle = document.getElementById('rectangle');
-
-                    // Adjust left and top positions
-                    const left = topLeftRect.left + window.scrollX - expandBy / 2;
-                    const top = topLeftRect.top + window.scrollY - expandBy / 2;
-
-                    // Adjust width and height
-                    const width = bottomRightRect.right - topLeftRect.left + expandBy / 2 + 1;
-                    const height = bottomRightRect.bottom - topLeftRect.top + expandBy / 2 + 1;
-
-                    // Apply styles to the rectangle
-                    rectangle.style.left = `${left}px`;
-                    rectangle.style.top = `${top}px`;
-                    rectangle.style.width = `${width}px`;
-                    rectangle.style.height = `${height}px`;
-
-                    // Ensure rectangle stays visible
-                    rectangle.style.position = 'absolute';
-                    rectangle.style.pointerEvents = 'none'; // Prevent interference with seats
-                }
+        // On click, hide seat selection, show payment
+        bookButton.addEventListener('click', () => {
+            if (selectedSeats.length === 0) {
+                alert('Vui lòng chọn ghế trước khi đặt vé');
+                return;
             }
-
-            // Initial draw
-            drawRectangle();
-
-            // Handle both horizontal and vertical scrolling
-            document.querySelector('.theater-container').addEventListener('scroll', drawRectangle);
-            window.addEventListener('scroll', drawRectangle);
-            window.addEventListener('resize', drawRectangle);
+            seatCount.textContent = selectedSeats.length;
+            seatSection.style.display = 'none';
+            paymentSection.style.display = 'block';
         });
-    </script>
-
-</body>
-
-</html>
+        // Implement back button functionality
+        const backButton = document.querySelector('.back-btn');
+        backButton.addEventListener('click', () => {
+            paymentSection.style.display = 'none';
+            seatSection.style.display = 'block';
+        });
+        // Rectangle highlight logic (optional)
+        function drawRectangle() {
+            const topLeft = document.getElementById('seat-top-left');
+            const bottomRight = document.getElementById('seat-bottom-right');
+            if (topLeft && bottomRight) {
+                const expandBy = 10;
+                const rectangle = document.getElementById('rectangle');
+                const topLeftRect = topLeft.getBoundingClientRect();
+                const bottomRightRect = bottomRight.getBoundingClientRect();
+                const left = topLeftRect.left + window.scrollX - expandBy / 2;
+                const top = topLeftRect.top + window.scrollY - expandBy / 2;
+                const width = bottomRightRect.right - topLeftRect.left + expandBy / 2 + 4;
+                const height = bottomRightRect.bottom - topLeftRect.top + expandBy / 2 + 4;
+                rectangle.style.left = `${left}px`;
+                rectangle.style.top = `${top}px`;
+                rectangle.style.width = `${width}px`;
+                rectangle.style.height = `${height}px`;
+                rectangle.style.position = 'absolute';
+                rectangle.style.pointerEvents = 'none';
+            }
+        }
+        drawRectangle();
+        document.querySelector('.theater-container').addEventListener('scroll', drawRectangle);
+        window.addEventListener('scroll', drawRectangle);
+        window.addEventListener('resize', drawRectangle);
+    });
+</script>
