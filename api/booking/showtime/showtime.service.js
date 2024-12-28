@@ -67,6 +67,11 @@ async function getShowtimes(movieId, date, city) {
             if (city && theaterCity != city) {
                 continue;
             }
+            const currentTime = new Date();
+            const showStartTime = new Date(`${date}T${startTime}`);
+            if (currentTime > showStartTime) {
+                continue;
+            }
             if (!theaterMap[theaterId]) {
                 theaterMap[theaterId] = {
                     theaterId,
