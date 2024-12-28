@@ -1,4 +1,5 @@
-const { getUserData, updateUserData } = require('./account.model');
+const { User, getUserData, updateUserData } = require('./account.model');
+const { cloudinary } = require('../cloudinary/config/cloud');
 
 const renderGeneral = async (req, res) => {
   try {
@@ -110,7 +111,7 @@ const updateAccountInfo = async (req, res) => {
       try {
         // Upload the image to Cloudinary
         const cloudinaryResponse = await cloudinary.uploader.upload(req.file.path, {
-          folder: "profile_pictures", // Folder name in Cloudinary
+          folder: "avatar_url", // Folder name in Cloudinary
           allowed_formats: ["jpeg", "png", "jpg", "gif"],
         });
 

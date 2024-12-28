@@ -1,0 +1,80 @@
+<section class="bg-sidebar2 d-flex">
+    <aside class="bg-sidebar2 text-white p-4" style="width: 240px">
+        <!-- Logo -->
+        <div class="d-flex align-items-center justify-content-center mb-4">
+            <span class="h2 mb-0">CineSeats</span>
+        </div>
+
+        <!-- User Info -->
+        <div class="d-flex align-items-center mb-4">
+            <img id="user-avatar" src="https://placehold.co/40x40" alt="User" class="rounded-circle me-2"
+                style="width: 40px; height: 40px" />
+            <div>
+                <div id="user-name" class="fw-bold">NAME</div>
+                <div id="user-role" class="small">Member</div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav>
+            <ul class="list-unstyled">
+                <li class="mb-3">
+                    <a href="/account/general"
+                        class="d-flex align-items-center p-2 text-white text-decoration-none hover-bg-secondary rounded">
+                        <i class="fa-solid fa-address-card me-2"></i> <span>General</span>
+                    </a>
+                </li>
+                {{!-- <li class="mb-3">
+                    <a href="/account/membership"
+                        class="d-flex align-items-center p-2 text-white text-decoration-none hover-bg-secondary rounded">
+                        <i class="fa-regular fa-credit-card me-2"></i> <span>Membership Card</span>
+                    </a>
+                </li> --}}
+                {{!-- <li class="mb-3">
+                    <a href="/account/voucher"
+                        class="d-flex align-items-center p-2 text-white text-decoration-none hover-bg-secondary rounded">
+                        <i class="fa-solid fa-ticket me-2"></i> <span>Voucher</span>
+                    </a>
+                </li> --}}
+                {{!-- <li class="mb-3">
+                    <a href="/account/history"
+                        class="d-flex align-items-center p-2 text-white text-decoration-none hover-bg-secondary rounded">
+                        <i class="fa-solid fa-cart-shopping me-2"></i> <span>Booking History</span>
+                    </a>
+                </li>
+                <li class="mb-3">
+                    <a href="/account/setting"
+                        class="d-flex align-items-center p-2 text-white text-decoration-none hover-bg-secondary rounded">
+                        <i class="fa-solid fa-gear me-2"></i> <span>Setting</span>
+                    </a>
+                </li> --}}
+                <li class="mb-3">
+                    <a href="/logout"
+                        class="d-flex align-items-center p-2 text-white text-decoration-none hover-bg-secondary rounded">
+                        <i class="fa-solid fa-right-from-bracket me-2"></i><span class="text-white">Log out</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+</section>
+
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        try {
+            // Fetch user data from backend
+            const response = await fetch("/account/info", { method: "GET" });
+            if (!response.ok) throw new Error("Failed to fetch user info");
+
+            const user = await response.json();
+
+            // Update the sidebar with user info
+            document.getElementById("user-name").textContent = `${user.username}`;
+            document.getElementById("user-avatar").src = user.avatar_url || "https://placehold.co/40x40";
+            document.getElementById("user-role").textContent = user.role || "Member";
+        } catch (error) {
+            console.error("Error loading user data:", error);
+            alert("Failed to load user data.");
+        }
+    });
+</script>

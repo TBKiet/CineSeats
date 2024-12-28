@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { renderAccount, renderDashBoard, renderMovie, deleteUser, blockUser, unblockUser, getFilteredAndSortedUsers, createMovie, getMovieById, updateMovie, deleteMovie, getFilteredAndSortedMovies, getTotalUsersCount, getTotalMoviesCount } = require("./admin.controllers");
-const { upload } = require('../cloudinary/config/cloud');
+const { uploadPoster } = require('../cloudinary/config/cloud');
 
 // Routes for rendering pages
 router.get("/dashboard", renderDashBoard);
@@ -16,9 +16,9 @@ router.get('/users', getFilteredAndSortedUsers);
 
 // API support movie management
 router.get('/movies', getFilteredAndSortedMovies);
-router.post('/movies', upload.single('movieImage'), createMovie);
+router.post('/movies', uploadPoster.single('movieImage'), createMovie);
 router.get('/movies/:id', getMovieById);
-router.put('/movies/:id', upload.single('movieImage'), updateMovie);
+router.put('/movies/:id', uploadPoster.single('movieImage'), updateMovie);
 router.delete('/movies/:id', deleteMovie);
 
 // API support dashboard management

@@ -12,6 +12,7 @@ const homeRouter = require("./components/home/home.routes");
 const userRouter = require("./components/auth/auth.routes");
 const profileRouter = require("./components/profile/profile.routes");
 const adminRouter = require('./components/admin/admin.routes');
+const accountRouter = require('./components/account/account.routes');
 
 const movieDBConnection = require('./config/movieDBConnection');
 const userDBConnection = require('./config/userDBConnection');
@@ -100,6 +101,7 @@ app.get("/contact", (req, res) => {
 });
 
 app.use('/admin', adminRouter);
+app.use('/account', accountRouter);
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);

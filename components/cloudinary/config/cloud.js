@@ -35,33 +35,33 @@
 // // })();
 
 // module.exports = cloudinary;
-
 require('dotenv').config();
 const cloudinary = require('cloudinary').v2;
 const multer = require('multer');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
-// Cấu hình Cloudinary
-try {
-    cloudinary.config({
-        cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dvnr2fqlk',
-        api_key: process.env.CLOUDINARY_API_KEY,
-        api_secret: process.env.CLOUDINARY_API_SECRET,
-    });
-    console.log('✅ Connected to Cloudinary successfully.');
-} catch (error) {
-    console.error('❌ Failed to connect to Cloudinary:', error.message);
-}
+// Configure Cloudinary
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dvnr2fqlk',
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+console.log('✅ Connected to Cloudinary successfully.');
 
 // Multer storage configuration for Cloudinary
-const storage = new CloudinaryStorage({
+const createCloudinaryStorage = (folder) => new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-        folder: 'movie_poster', // Folder name on Cloudinary
-        allowed_formats: ['jpeg', 'png', 'jpg', 'gif'], // Allow specific formats
+        folder: folder,
+        allowed_formats: ['jpeg', 'png', 'jpg', 'gif'],
     },
 });
 
-const upload = multer({ storage: storage });
+const storageMovie = createCloudinaryStorage('movie_poster');
+const storageAvatar = createCloudinaryStorage('avatar_folder'); // Assuming a different folder for avatars
 
-module.exports = { cloudinary, upload };
+const uploadPoster = multer({ storage: storageMovie });
+const uploadAvatar = multer({ storage: storageAvatar });
+
+module.exports = { cloudinary, uploadPoster, uploadAvatar };
