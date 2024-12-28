@@ -297,6 +297,19 @@ const getTotalUsersCount = async (req, res) => {
   }
 };
 
+const getTotalMoviesCount = async (req, res) => {
+  try {
+    if (!req.isAuthenticated()) {
+      return res.status(401).send("Unauthorized");
+    }
+    const totalMovies = await Movie.countDocuments(); // Count all movies
+    res.json({ totalMovies }); // Send the total movie count in the response
+  } catch (error) {
+    console.error("Error fetching total movies:", error);
+    res.status(500).send("Error fetching total movies");
+  }
+};
+
 module.exports = {
   //render
   renderAccount,
@@ -313,5 +326,6 @@ module.exports = {
   getMovieById,
   updateMovie,
   deleteMovie,
-  getFilteredAndSortedMovies
+  getFilteredAndSortedMovies,
+  getTotalMoviesCount
 };

@@ -6,14 +6,14 @@
             <h1>Dashboard</h1>
 
             <div class="cards">
-                <!-- Total Tickets -->
+                <!-- Total Movies -->
                 <div class="card-dashboard">
                     <div class="icon" style="background-color: #ff9800;">
                         <i class="fa fa-ticket-alt"></i>
                     </div>
                     <div class="content-card">
-                        <h3>Total Tickets</h3>
-                        <p id="value-total-tickets">0</p>
+                        <h3>Total Movies</h3>
+                        <p id="value-total-movies">0</p>
                     </div>
                 </div>
 
@@ -28,6 +28,17 @@
                     </div>
                 </div>
 
+                <!-- Total Tickets -->
+                <div class="card-dashboard">
+                    <div class="icon" style="background-color: #ff9800;">
+                        <i class="fa fa-ticket-alt"></i>
+                    </div>
+                    <div class="content-card">
+                        <h3>Total Tickets</h3>
+                        <p id="value-total-tickets">0</p>
+                    </div>
+                </div>
+
                 <!-- Total Revenue -->
                 <div class="card-dashboard">
                     <div class="icon" style="background-color: #f44336;">
@@ -36,16 +47,6 @@
                     <div class="content-card">
                         <h3>Total Revenue</h3>
                         <p id="value-total-revenue">0</p>
-                    </div>
-                </div>
-                <!-- Pending Requests -->
-                <div class="card-dashboard">
-                    <div class="icon" style="background-color: #03a9f4;">
-                        <i class="fa fa-exclamation-circle"></i>
-                    </div>
-                    <div class="content-card">
-                        <h3>Pending Requests</h3>
-                        <p id="value-pending-requests">0</p>
                     </div>
                 </div>
             </div>
@@ -102,6 +103,10 @@
     <!-- Include required JS libraries -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        let totalUsers = 0;
+        let totalMovies = 0;
+        let totalTickets = 0;
+        let totalRevenue = 0;
 
         // Function to fetch and update total users
         async function fetchTotalUsers() {
@@ -112,8 +117,10 @@
                     console.log('Total Users Data:', data);  // Debug: check the fetched data
                     const totalUsersElement = document.getElementById('value-total-users');
                     if (totalUsersElement) {
-                        console.log('Updating total users value');
+                        //console.log('Updating total users value');
                         totalUsersElement.textContent = data.totalUsers; // Update the element with the total users
+                        totalUsers = data.totalUsers;
+                        updateOverviewChart();
                     } else {
                         console.error('Element with id "value-total-users" not found');
                     }
@@ -125,7 +132,41 @@
             }
         }
 
+        // Function to fetch and update total movies
+        async function fetchTotalMovies() {
+            try {
+                const response = await fetch('/admin/dashboard/total-movies'); // API endpoint for total movies
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Total Movies Data:', data);  // Debug: check the fetched data
+                    const totalMoviesElement = document.getElementById('value-total-movies');
+                    if (totalMoviesElement) {
+                        //console.log('Updating total movies value');
+                        totalMoviesElement.textContent = data.totalMovies; // Update the element with the total movies
+                        totalMovies = data.totalMovies;
+                        updateOverviewChart();
+                    } else {
+                        console.error('Element with id "value-total-movies" not found');
+                    }
+                } else {
+                    console.error('Failed to fetch total movies');
+                }
+            } catch (error) {
+                console.error('Error fetching total movies:', error);
+            }
+        }
+
+        // Update Overview Chart with fetched data
+        function updateOverviewChart() {
+            // Only update the chart if both values are fetched
+            if (totalUsers !== 0 && totalMovies !== 0) {
+                pieChart.data.datasets[0].data = [totalMovies, totalUsers, 0, 0]; // Adjust 120 for the revenue data if needed
+                pieChart.update();
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', fetchTotalUsers);
+        document.addEventListener('DOMContentLoaded', fetchTotalMovies);
 
         // Initialize charts
         const ctxPie = document.getElementById('pieChart').getContext('2d');
@@ -135,9 +176,9 @@
         const pieChart = new Chart(ctxPie, {
             type: 'pie',
             data: {
-                labels: ['Tickets Sold', 'Users Registered', 'Revenue Earned'],
+                labels: ['Movies', 'Users', 'Tickets Sold', 'Revenue Earned'],
                 datasets: [{
-                    data: [300, 150, 120],
+                    data: [0, 0, 0, 0],
                     backgroundColor: ['#ff9800', '#4caf50', '#f44336'],
                 }]
             },
