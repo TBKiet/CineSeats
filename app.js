@@ -1,29 +1,41 @@
 require("dotenv").config();
-require('./config/movieDBConnection');
-require('./config/userDBConnection');
 const express = require("express");
 const session = require("express-session");
+const mongoose = require("mongoose");
 const passport = require("passport");
-const {engine} = require("express-handlebars");
+const { engine } = require("express-handlebars");
 const path = require("path");
 const MongoStore = require("connect-mongo");
+
 const movieRouter = require("./components/movies/movies.routes");
-const searchRouter = require("./components/search/search.routes");
-const homeRouter = require("./components/home/routes");
+const homeRouter = require("./components/home/home.routes");
 const userRouter = require("./components/auth/auth.routes");
 const profileRouter = require("./components/profile/profile.routes");
-const apiRouter = require("./components/api/api.routes");
+const bookingRouter = require("./components/booking/booking.routes");
+const paymentRouter = require("./components/payment/payment.routes");
+const adminRouter = require('./components/admin/admin.routes');
+const accountRouter = require('./components/account/account.routes');
+
+const movieDBConnection = require('./config/movieDBConnection');
+const userDBConnection = require('./config/userDBConnection');
+const cineseatsDBConnection = require('./config/cineseatsDBConnection');
+
+const apiMoviesRouter = require('./api/movies/movies.routes');
+const apiShowtimeRouter = require('./api/booking/showtime/showtime.routes');
+const apiBookingRouter = require('./api/booking/booking/booking.routes');
 
 const app = express();
 const PORT = 3000;
 
 // Serve static files
 app.use(express.static(path.join(__dirname, "public")));
-
 // Handle register and login form data
 app.use(express.json());
-app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({ extended: true }));
 
+app.use('/api/movies', apiMoviesRouter);
+app.use('/api/showtime', apiShowtimeRouter);
+app.use('/api/booking', apiBookingRouter);
 // Set up session middleware with MongoDB store
 app.use(session({
     secret: process.env.SESSION_SECRET, // Replace with your own secret
@@ -55,6 +67,8 @@ app.engine(
             eq: (a, b) => a === b,
             gt: (a, b) => a > b,
             lt: (a, b) => a < b,
+            lte: (a, b) => a <= b,
+            and: (a, b) => a && b,
             range: (start, end) => {
                 const range = [];
                 for (let i = start; i <= end; i++) {
@@ -62,6 +76,14 @@ app.engine(
                 }
                 return range;
             },
+            padZero: (number) => {
+                return number < 10 ? '0' + number : number;
+            },
+            assignSeatId: (index) => {
+                if (index == 3 || index == 4) return 'seat-top-left';
+                if (index == 8) return 'seat-bottom-right';
+                return '';
+            }
         },
     })
 );
@@ -72,6 +94,7 @@ app.set("view engine", "hbs");
 app.use((req, res, next) => {
     res.locals.isAuthenticated = req.isAuthenticated();
     res.locals.username = req.user ? req.user.username : null;
+    res.locals.user = req.user ? req.user.toObject ? req.user.toObject() : { ...req.user } : null; // Convert user to plain object
     next();
 });
 
@@ -79,17 +102,20 @@ app.use((req, res, next) => {
 app.use("/", userRouter);
 app.use("/", homeRouter);
 app.use("/movies", movieRouter);
-app.use("/search", searchRouter);
 app.use("/profile", profileRouter);
-app.use("/api", apiRouter);
+app.use("/booking", bookingRouter);
+app.use("/payment", paymentRouter);
+
 app.get("/about", (req, res) => {
-    res.render("about", {layout: "main"});
+    res.render("about", { layout: "main" });
 });
 
 app.get("/contact", (req, res) => {
-    res.render("contact", {layout: "main"});
+    res.render("contact", { layout: "main" });
 });
 
+app.use('/admin', adminRouter);
+app.use('/account', accountRouter);
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);

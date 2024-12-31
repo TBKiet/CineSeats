@@ -3,14 +3,15 @@ const bcrypt = require("bcryptjs");
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const sendEmail = require('../../utility/sendEmail');
+const passwordStrength = require('../../utility/checkInput').passwordStrength;
 
 passport.use(new LocalStrategy(async (username, password, done) => {
     try {
-        const user = await User.findOne({username, isActive: true});
-        if (!user) return done(null, false, {message: 'Incorrect username.'});
+        const user = await User.findOne({ username, isActive: true });
+        if (!user) return done(null, false, { message: 'Incorrect username.' });
 
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) return done(null, false, {message: 'Incorrect password.'});
+        if (!isMatch) return done(null, false, { message: 'Incorrect password.' });
 
         return done(null, user);
     } catch (err) {
@@ -21,20 +22,19 @@ passport.use(new LocalStrategy(async (username, password, done) => {
 // Serialize and Deserialize User
 passport.serializeUser((user, done) => done(null, user.username));
 passport.deserializeUser((username, done) => {
-    User.findOne({username})
+    User.findOne({ username })
         .then(user => done(null, user))
         .catch(err => done(err));
 });
 
 async function registerHandler(username, email, password, re_password, res, req) {
-    const renderAlert = (message, type) => res.render('register', {alert: message, alertType: type});
+    const renderAlert = (message, type) => res.render('register', { alert: message, alertType: type });
 
     if (!username || !email || !password || !re_password) {
         return renderAlert('Please enter all fields', 'danger');
     }
 
     const strength = passwordStrength(password);
-
     if (strength === 0) {
         return renderAlert('Password must be at least 8 characters', 'danger');
     }
@@ -47,8 +47,8 @@ async function registerHandler(username, email, password, re_password, res, req)
     }
 
     try {
-        const existingUser = await User.findOne({username});
-        const existingEmail = await User.findOne({email});
+        const existingUser = await User.findOne({ username });
+        const existingEmail = await User.findOne({ email });
         if (existingUser || existingEmail) {
             return renderAlert('User already exists', 'danger');
         }
@@ -56,7 +56,7 @@ async function registerHandler(username, email, password, re_password, res, req)
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-        const newUser = await User.create({username, email, password: hashedPassword});
+        const newUser = await User.create({ username, email, password: hashedPassword });
 
         const verificationToken = newUser.getVerificationToken();
         await newUser.save();
@@ -77,5 +77,6 @@ async function registerHandler(username, email, password, re_password, res, req)
     }
 }
 
-
-module.exports = {registerHandler};
+module.exports = {
+    registerHandler,
+};

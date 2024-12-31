@@ -1,100 +1,221 @@
-<header>
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
-        <div class="container-fluid ">
-            <a class="navbar-brand" href="/"><img src="/images/logo.png" alt="CineSeats logo"></a>
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid ">
+        <a class="navbar-brand" href="/"><img src="/images/logo.png" alt="CineSeats logo"></a>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#navbarSupportedContent"
-                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link" aria-current="page" href="/">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" aria-current="page" href="/movies">Movies</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" aria-current="page" href="/contact">Contact</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" aria-current="page" href="/about">About Us</a>
-                    </li>
-                </ul>
-                <form id="search-form">
-                    <div class="search-box">
-                        <!-- Use button to submit the form -->
-                        <button type="submit" class="btn-search">
-                            <i class="fa-solid fa-magnifying-glass"></i>
-                        </button>
-                        <input type="text" name="keyword" class="search-field" id="search-field"
-                               placeholder="Search for movies">
-                    </div>
-                </form>
-                <div class="hollow-item" style="margin-top: 60px;"></div>
-            </div>
-
-
-            <script>
-                // // Get the search field and form
-                // const searchField = document.getElementById('search-field');
-                // const form = document.getElementById('search-form');
-                //
-                // // Event listener for when the user presses "Enter" or clicks the search button
-                // searchField.addEventListener('keypress', function (event) {
-                //     if (event.key === 'Enter') {
-                //         if (searchField.value.trim() !== '') {
-                //             handleSearch();
-                //         }
-                //     }
-                // });
-                //
-                // // Event listener for when the form is submitted (button click or Enter)
-                // form.addEventListener('submit', function (event) {
-                //     event.preventDefault();  // Prevent default form submission
-                //     if (searchField.value.trim() !== '') {
-                //         handleSearch();
-                //     }
-                // });
-                //
-                // function handleSearch() {
-                //     const queryParams = new URLSearchParams();
-                //     queryParams.append('keyword', searchField.value);
-                //
-                //
-                //     // Get the current path to determine the action URL
-                //     const currentPath = window.location.href;
-                //     let url = `/search`;
-                //
-                //     // Adjust URL based on current path (showing, upcoming, etc.)
-                //     if (currentPath.includes('/showing')) {
-                //         url = `/search/showing`;
-                //     } else if (currentPath.includes('/upcoming')) {
-                //         url = `/search/upcoming`;
-                //     }
-                //
-                //     // Append query parameters if they exist
-                //     if (queryParams.toString()) {
-                //         url += `?${queryParams.toString()}`;
-                //     }
-                //
-                //     // Update form action and submit
-                //     form.action = url;
-                //     form.submit();  // Submit the form to the new URL
-                // }
-            </script>
-            {{#if isAuthenticated}}
-                <a href="/logout">
-                    <button class="nav-button" type="submit">Log Out</button>
-                </a>
-            {{else}}
-                <a href="/login">
-                    <button class="nav-button" type="submit">Sign In</button>
-                </a>
-            {{/if}}
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" aria-current="page" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" aria-current="page" href="/movies">Movies</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" aria-current="page" href="/contact">Contact</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" aria-current="page" href="/about">About Us</a>
+                </li>
+            </ul>
+            <form id="search-form" method="get">
+                <div class="search-box">
+                    <!-- Use button to submit the form -->
+                    <button type="submit" class="btn-search">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                    <input type="text" name="keyword" class="search-field" id="search-field"
+                        placeholder="Search for movies">
+                </div>
+            </form>
+            <div class="hollow-item" style="margin-top: 60px;"></div>
         </div>
 
-    </nav>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const searchField = document.getElementById('search-field');
+                const form = document.getElementById('search-form');
+
+                // Event listener for form submission (button click or Enter key)
+                form.addEventListener('submit', function (event) {
+                    event.preventDefault(); // Prevent default form submission
+                    if (searchField.value.trim() !== '') {
+                        handleSearch();
+                    }
+                });
+
+                function handleSearch(page = 1) {
+                    // Get the current URL
+                    const currentPath = window.location.href;
+
+                    if (currentPath.includes('/movies')) {
+                        const typeFilter = document.getElementById('type-filter');
+                        if (typeFilter) typeFilter.value = 'none';
+                        const genreFilter = document.getElementById('genre-filter');
+                        if (genreFilter) genreFilter.value = 'none';
+                        const ageFilter = document.getElementById('age-filter');
+                        if (ageFilter) ageFilter.value = 'none';
+                        const ratingFilter = document.getElementById('rating-filter');
+                        if (ratingFilter) ratingFilter.value = 'none';
+                        const countryFilter = document.getElementById('country-filter');
+                        if (countryFilter) countryFilter.value = 'none';
+                    }
+
+
+                    const urlParams = new URLSearchParams(window.location.search);
+
+                    const keyword = urlParams.get('keyword');
+                    if (keyword)
+                        searchField.value = keyword;
+                    const queryParams = new URLSearchParams();
+                    queryParams.append('keyword', searchField.value.trim());
+                    if (page != 1) queryParams.append('page', page);
+
+
+                    let searchUrl = '';
+
+                    // Determine the URL structure based on the current path
+                    if (!currentPath.includes('/movies')) {
+                        searchUrl = `${currentPath}movies?${queryParams.toString()}`;
+                        form.action = searchUrl;
+                        console.log(form.action);
+                        form.submit(); // Submit the form to navigate to the search page
+                        document.getElementById('search-field').value = null; // Clear the search field
+                    } else {
+                        searchUrl = queryParams.toString() ? `${window.location.pathname}?${queryParams.toString()}` : window.location.pathname;
+                        window.history.pushState({ path: searchUrl }, '', searchUrl);
+                        document.getElementById('search-field').value = null; // Clear the search field
+                        // Fetch and update the movie list dynamically
+                        fetch(`/api${searchUrl}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                renderMovies(data.movies);
+                                renderPagination(data.currentPage, data.totalPages);
+                            })
+                            .catch(error => {
+                                console.error('Error fetching movies:', error);
+                                const movieList = document.getElementById('movie-list');
+                                movieList.innerHTML = `
+                            <div class="text-box p-0 mt-1 mb-5">
+                                <h1>Error loading movies. Please try again later.</h1>
+                            </div>
+                        `;
+                            });
+                    }
+
+                }
+
+                function renderMovies(movies) {
+                    const movieList = document.getElementById('movie-list');
+                    movieList.innerHTML = ''; // Clear the current list
+
+                    if (movies.length) {
+                        movies.forEach(movie => {
+                            const movieItem = document.createElement('div');
+                            movieItem.className = 'col-6 col-sm-6 col-xl-3 movie-item';
+                            movieItem.innerHTML = `
+                        <div class="brief-des">
+                            <a href="/movies/${movie.id}">
+                                <img src="${movie.image}" alt="${movie.name_vn}" class="img-fluid">
+                            </a>
+                            <div class="rating">
+                                ${movie.ratings ? `<i class="fa-solid fa-star"></i><p>${movie.ratings}</p>` : ''}
+                            </div>
+                            <div class="age-limit">${movie.limitage_vn}</div>
+                            <a href="/movies/${movie.id}">
+                                <div class="text-container">
+                                    <ul>
+                                        <li><i class="fa-solid fa-tag"></i> ${movie.type_name_vn}</li>
+                                        <li><i class="fa-solid fa-clock"></i> ${movie.time} phút</li>
+                                        <li><i class="fa-solid fa-globe"></i> ${movie.country_name_vn}</li>
+                                    </ul>
+                                </div>
+                            </a>
+                        </div>
+                        <p class="mv-name">${movie.name_vn}</p>
+                    `;
+                            movieList.appendChild(movieItem);
+                        });
+                    } else {
+                        movieList.innerHTML = `
+                    <div class="text-box p-0 mt-1 mb-5">
+                        <h1>No Movies Found</h1>
+                        <h1>No Movies Found</h1>
+                    </div>
+                `;
+                    }
+                }
+
+                function renderPagination(currentPage, totalPages) {
+                    const pagination = document.querySelector('.pagination.justify-content-center');
+                    pagination.innerHTML = ''; // Clear existing pagination
+
+                    // Add previous page button
+                    if (currentPage > 1) {
+                        const prevPageItem = document.createElement('li');
+                        prevPageItem.className = 'page-item';
+                        prevPageItem.innerHTML = `
+                    <button class="page-link prev-page" aria-label="Previous" data-page="${currentPage - 1}">
+                        <span aria-hidden="true">&laquo;</span>
+                    </button>
+                `;
+                        pagination.appendChild(prevPageItem);
+                    }
+
+                    // Add page number buttons
+                    for (let i = 1; i <= totalPages; i++) {
+                        const pageItem = document.createElement('li');
+                        pageItem.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                        pageItem.innerHTML = `<button class="page-link page-number" data-page="${i}">${i}</button>`;
+                        pagination.appendChild(pageItem);
+                    }
+
+                    // Add next page button
+                    if (currentPage < totalPages) {
+                        const nextPageItem = document.createElement('li');
+                        nextPageItem.className = 'page-item';
+                        nextPageItem.innerHTML = `
+                    <button class="page-link next-page" aria-label="Next" data-page="${currentPage + 1}">
+                        <span aria-hidden="true">&raquo;</span>
+                    </button>
+                `;
+                        pagination.appendChild(nextPageItem);
+                    }
+
+                    // Attach event listeners to pagination buttons
+                    attachPaginationListeners();
+                }
+
+                function attachPaginationListeners() {
+                    document.querySelectorAll('.page-link').forEach(button => {
+                        button.addEventListener('click', (event) => {
+                            const page = event.target.closest('button').getAttribute('data-page');
+                            handleSearch(page);
+                        });
+                    });
+                }
+            });
+        </script>
+
+        {{!-- Authentication buttons --}}
+        {{#if isAuthenticated}}
+        {{#if (eq user.role "admin")}}
+        <a href="/admin/dashboard">
+            <button class="nav-button" type="button">Admin</button>
+        </a>
+        {{/if}}
+        <a href="/account/general">
+            <button class="nav-button" type="button">Profile</button>
+        </a>
+        {{else}}
+        <a href="/login">
+            <button class="nav-button" type="submit">Sign In</button>
+        </a>
+        {{/if}}
+    </div>
+</nav>
 </header>

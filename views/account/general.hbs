@@ -1,0 +1,228 @@
+<section class="d-flex">
+    {{> sidebar2 }}
+    <div class="d-flex flex-md-row p-0">
+        <!-- User Info Section -->
+        <section class="container col-md-4 m-5 py-4 bg-white rounded shadow">
+            <div class="d-flex justify-content-center align-items-center mb-4">
+                <img id="profile-picture" src="https://placehold.co/100x100" alt="User" class="rounded-circle me-2"
+                    style="width: 100px; height: 100px;" />
+                <div>
+                    <div class="fw-bold" id="user-full-name">NAME</div>
+                    <div class="small" id="role">
+                        <i class="fa-solid fa-medal"></i>Member
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <div class="text-center m-4 pb-4 d-flex justify-content-between align-items-center">
+                <h3 class="h6 mb-0">Tổng chi tiêu 2024 <i class="fas fa-info-circle text-muted small"></i></h3>
+                <p class="text-warning fs-5 fw-bold mb-0" id="user-spent">0 đ</p>
+            </div>
+            <!-- Progress Bar Section -->
+            <div class="position-relative m-4">
+                <div class="d-flex justify-content-between position-absolute w-100" style="top: -30px;">
+                    <i class="fas fa-medal text-warning fs-4"></i>
+                    <i class="fas fa-star text-primary fs-4"></i>
+                    <i class="fas fa-tools text-warning fs-4"></i>
+                </div>
+                <div class="progress" style="height: 8px;">
+                    <div id="progress-bar" class="progress-bar bg-primary" role="progressbar" style="width: 0%;"></div>
+                </div>
+                <div class="d-flex justify-content-between position-absolute w-100" style="top: -5px;">
+                    <span class="rounded-circle bg-white border border-primary"
+                        style="width: 16px; height: 16px;"></span>
+                    <span class="rounded-circle bg-white border border-primary"
+                        style="width: 16px; height: 16px;"></span>
+                    <span class="rounded-circle bg-white border border-primary"
+                        style="width: 16px; height: 16px;"></span>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between m-4 text-secondary small">
+                <span>0 đ</span>
+                <span>2.000.000 đ</span>
+                <span>4.000.000 đ</span>
+            </div>
+            <hr>
+            <p>HOTLINE hỗ trợ: 19002224 (9:00 - 22:00)</p>
+            <hr>
+            <p>Email: cineseats@gmail.com</p>
+            <hr>
+            <p>Câu hỏi thường gặp</p>
+        </section>
+
+        <!-- Personal Information Section -->
+        <section class="col-md-7 container mx-0 my-5 pb-4 bg-white rounded shadow">
+            <h1 class="mb-4 fw-bold">Personal Information</h1>
+            <form id="user-info-form" enctype="multipart/form-data">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="position-relative">
+                        <img id="profile-picture-edit" src="https://placehold.co/100x100" alt="Profile picture"
+                            class="rounded-circle me-3" style="width: 100px; height: 100px;" />
+                        <label for="upload-profile-picture"
+                            class="fas fa-camera position-absolute bottom-0 end-0 bg-white p-2 rounded-circle text-secondary border"></label>
+                        <input type="file" id="upload-profile-picture" name="avatar_url" accept="image/*"
+                            style="display: none;" />
+                    </div>
+                </div>
+                <div class="row g-3">
+                    <!-- First Name -->
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary">First Name</label>
+                        <div class="position-relative">
+                            <input id="first-name" name="firstName" type="text" class="form-control pe-5"
+                                style="height: 40px;" />
+                            <i class="fas fa-user position-absolute"
+                                style="top: 50%; right: 10px; transform: translateY(-50%); color: #6c757d;"></i>
+                        </div>
+                    </div>
+                    <!-- Last Name -->
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary">Last Name</label>
+                        <div class="position-relative">
+                            <input id="last-name" name="lastName" type="text" class="form-control pe-5" />
+                            <i class="fas fa-user position-absolute"
+                                style="top: 50%; right: 10px; transform: translateY(-50%); color: #6c757d;"></i>
+                        </div>
+                    </div>
+                    <!-- Email -->
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary">Email</label>
+                        <div class="position-relative">
+                            <input id="email" name="email" type="email" class="form-control pe-5" />
+                            <i class="fas fa-envelope position-absolute"
+                                style="top: 50%; right: 10px; transform: translateY(-50%); color: #6c757d;"></i>
+                        </div>
+                    </div>
+                    <!-- Phone Number -->
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary">Phone Number</label>
+                        <div class="position-relative">
+                            <input id="phone" name="phone" type="text" class="form-control pe-5" />
+                            <i class="fas fa-phone position-absolute"
+                                style="top: 50%; right: 10px; transform: translateY(-50%); color: #6c757d;"></i>
+                        </div>
+                    </div>
+                    <!-- Date of Birth -->
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary">Date of Birth</label>
+                        <div class="position-relative">
+                            <input id="birthday" name="birthday" type="text" class="form-control pe-5" />
+                            <i class="fas fa-calendar-alt position-absolute"
+                                style="top: 50%; right: 10px; transform: translateY(-50%); color: #6c757d;"></i>
+                        </div>
+                    </div>
+                    <!-- Country -->
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary">Country</label>
+                        <div class="position-relative">
+                            <input id="country" name="country" type="text" class="form-control pe-5" />
+                            <i class="fas fa-globe position-absolute"
+                                style="top: 50%; right: 10px; transform: translateY(-50%); color: #6c757d;"></i>
+                        </div>
+                    </div>
+                    <!-- Address -->
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary">Address</label>
+                        <div class="position-relative">
+                            <input id="address" name="address" type="text" class="form-control pe-5" />
+                            <i class="fa-solid fa-house position-absolute"
+                                style="top: 50%; right: 10px; transform: translateY(-50%); color: #6c757d;"></i>
+                        </div>
+                    </div>
+                    <!-- Favorite Theater -->
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary">Favorite Theater</label>
+                        <div class="position-relative">
+                            <input id="theater" name="theater" type="text" class="form-control pe-5" />
+                            <i class="fa-solid fa-film position-absolute"
+                                style="top: 50%; right: 10px; transform: translateY(-50%); color: #6c757d;"></i>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary mt-4">Update</button>
+            </form>
+        </section>
+    </div>
+</section>
+
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        try {
+            // Fetch user data from the backend
+            const response = await fetch("/account/info", { method: "GET" });
+            if (!response.ok) throw new Error("Failed to fetch user info");
+            const user = await response.json();
+
+            // Populate user info card
+            const defaultAvatar = "https://placehold.co/100x100";
+            const avatarUrl = user.avatar_url || defaultAvatar;
+            document.getElementById("profile-picture").src = avatarUrl;
+            document.getElementById("profile-picture-edit").src = avatarUrl;
+            document.getElementById("role").innerHTML = `<i class="fa-solid fa-medal"></i>${user.role || "Member"}`;
+            document.getElementById("user-full-name").textContent =
+                `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username;
+            document.getElementById("user-spent").textContent = `${user.accumulated_points || 0} đ`;
+
+            // Populate progress bar
+            const progressBar = document.getElementById("progress-bar");
+            const progress = Math.min((user.spent || 0) / 4000000 * 100, 100);
+            progressBar.style.width = `${progress}%`;
+
+            // Populate form fields
+            document.getElementById("first-name").value = user.firstName || '';
+            document.getElementById("last-name").value = user.lastName || '';
+            document.getElementById("email").value = user.email || '';
+            document.getElementById("phone").value = user.phone || '';
+            document.getElementById("birthday").value = user.birthday || '';
+            document.getElementById("country").value = user.country || '';
+            document.getElementById("address").value = user.address || '';
+            document.getElementById("theater").value = user.theater || '';
+        } catch (error) {
+            console.error("Error loading user data:", error);
+            alert("Failed to load user data.");
+        }
+    });
+
+    document.getElementById("user-info-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        // Create a FormData object
+        const formData = new FormData(event.target);
+
+        try {
+            // Send the form data
+            const response = await fetch("/account/update", {
+                method: "POST",
+                body: formData,
+            });
+
+            if (!response.ok) throw new Error("Failed to update user info");
+
+            const result = await response.json();
+            alert("User information updated successfully!");
+
+            // If the profile picture was updated, update the preview
+            const avatarFile = formData.get("avatar_url");
+            if (avatarFile) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    document.getElementById("profile-picture-edit").src = reader.result;
+                };
+                reader.readAsDataURL(avatarFile);
+            }
+
+            // Fetch the updated user data (including the profile picture) and update the page
+            const updatedUserResponse = await fetch("/account/info", { method: "GET" });
+            if (!updatedUserResponse.ok) throw new Error("Failed to fetch updated user info");
+            const updatedUser = await updatedUserResponse.json();
+
+            // Update the profile picture and user info on the page
+            const updatedAvatarUrl = updatedUser.avatar_url || "https://placehold.co/100x100";
+            document.getElementById("profile-picture").src = updatedAvatarUrl;
+            document.getElementById("profile-picture-edit").src = updatedAvatarUrl;
+        } catch (error) {
+            console.error("Error updating user info:", error);
+            alert("Failed to update user information.");
+        }
+    });
+</script>

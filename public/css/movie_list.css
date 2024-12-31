@@ -429,7 +429,7 @@
   width: 100%;
   height: 550px;
   position: relative;
-} 
+}
 
 
 .mv-detail:before {
@@ -593,72 +593,30 @@
   font-weight: normal;
 }
 
-
-.mv-detail .popular-movie-slider .popular-movie-slider-content .movie-btns {
-  display: flex;
-  gap: 10px;
-}
-
-
-.mv-detail .popular-movie-slider .popular-movie-slider-content .movie-btns button {
-  width: 200px;
-  border: none;
-  outline: none;
-  border-radius: 100px;
-  font-size: 1em;
-  background: #DB0000;
-  color: #fff;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 2px;
-}
-
-.mv-detail .popular-movie-slider .popular-movie-slider-content .movie-btns button p {
-  font-size: 1rem;
-  color: #fff;
-  margin-bottom: 10px;
-  margin-top: 5px;
-}
-
-
-.mv-detail .popular-movie-slider .popular-movie-slider-content .movie-btns .read-more {
-  background: none;
-}
-
-.mv-detail .popular-movie-slider .popular-movie-slider-content .movie-btns .read-more:hover {
-  background: #000;
-}
-
-.mv-detail .popular-movie-slider .popular-movie-slider-content .movie-btns button:hover {
-  background: #000;
-}
-
-
 .text-box {
-	position: relative;
-	display: flex;
-	align-items: center;
-	justify-content: center;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .text-box h1 {
   font-family: "Inter", sans-serif;
-	font-size: 8vw;
-	font-weight: 900;
-	background-color: #000;
-	color: #fff;
-	display: block;
-	padding: .5em;
+  font-size: 8vw;
+  font-weight: 900;
+  background-color: #000;
+  color: #fff;
+  display: block;
+  padding: .5em;
 }
 
 .text-box h1:nth-child(2) {
-	position: absolute;
-	background-color: #fff;
-	color: #000;
-	clip-path: inset(-1% -1% 50% -1%);
+  position: absolute;
+  background-color: #fff;
+  color: #000;
+  clip-path: inset(-1% -1% 50% -1%);
 }
+
 /* Default styles are for larger screens (desktop) */
 
 /* Large Desktop: 1200px and up */
@@ -731,9 +689,11 @@
   .mv-detail .popular-movie-slider-content p {
     margin-bottom: 10px;
   }
+
   .mv-detail .popular-movie-slider-content .movie-name {
     font-size: 0.8rem;
   }
+
   .mv-detail .popular-movie-slider .poster {
     width: auto;
     height: 600px;
@@ -780,4 +740,254 @@
   .movie-btns {
     margin-bottom: 20px;
   }
+}
+
+.pagination {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+  gap: 5px;
+}
+
+.page-item {
+  display: inline-block;
+}
+
+.page-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+  padding: 8px 12px;
+  margin: 0 2px;
+  color: #495057;
+  background-color: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.page-link:hover {
+  color: rgb(5, 94, 196);
+  background-color: #e9ecef;
+  border-color: #dee2e6;
+  text-decoration: none;
+}
+
+.page-item.active .page-link {
+  color: #fff;
+  background-color: rgb(5, 94, 196);
+  border-color: rgb(5, 94, 196);
+  cursor: default;
+}
+
+.page-link:focus {
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Disabled state styling */
+.page-item.disabled .page-link {
+  color: #6c757d;
+  background-color: #fff;
+  border-color: #dee2e6;
+  cursor: not-allowed;
+}
+
+/* Previous and Next button specific styling */
+.prev-page,
+.next-page {
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .page-link {
+    min-width: 35px;
+    height: 35px;
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+}
+
+.showtime-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.showtime-container h1 {
+  font-size: 24px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.showtime-container h1 {
+  font-size: 24px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.showtime-container .top-section {
+  margin-bottom: 24px;
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .showtime-container .top-section {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.showtime-container .filter-section {
+  display: flex;
+  gap: 8px;
+}
+
+@media (min-width: 768px) {
+  .showtime-container .filter-section {
+    width: 400px;
+    flex-shrink: 0;
+  }
+}
+
+.showtime-container .filter-dropdown {
+  flex: 1;
+}
+
+.showtime-container .filter-btn {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  text-align: left;
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.showtime-container .filter-btn::after {
+  content: '▼';
+  font-size: 10px;
+  color: #666;
+}
+
+.showtime-container .date-selector {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 0;
+}
+
+.showtime-container .date-btn {
+  min-width: 64px;
+  padding: 8px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  text-align: center;
+}
+
+.showtime-container .date-btn.active {
+  background: #00a5ed;
+  color: white;
+  border-color: #00a5ed;
+}
+
+.showtime-container .date-btn .day {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.showtime-container .date-btn .weekday {
+  font-size: 12px;
+  color: #666;
+}
+
+.showtime-container .date-btn.active .weekday {
+  color: #fff;
+}
+
+.showtime-container .theater-section {
+  padding: 0 16px;
+}
+
+.showtime-container .theater {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.showtime-container .theater-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.showtime-container .theater-logo {
+  width: 40px;
+  height: 40px;
+  background: #00a5ed;
+  border-radius: 50%;
+  margin-right: 12px;
+}
+
+.showtime-container .theater-info h2 {
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.showtime-container .theater-info p {
+  font-size: 14px;
+  color: #666;
+}
+
+.showtime-container .map-link {
+  color: #00a5ed;
+  text-decoration: none;
+  margin-left: 8px;
+}
+
+.showtime-container .showtimes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.showtime-container .showtime {
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.showtime-container .showtime:hover {
+  background: #f5f5f5;
+}
+
+.showtime-container .time {
+  color: #00a5ed;
+  font-weight: 500;
+}
+
+.showtime-container .end-time {
+  color: #666;
+  font-size: 12px;
 }

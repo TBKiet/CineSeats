@@ -1,315 +1,268 @@
 <section>
     <div class="container-fluid">
         <div class="filter-bar row my-3">
-            <div class="col-md-3 d-flex align-items-center">
+            <div class="col-md-5 d-flex align-items-center">
                 <ul class="nav-film">
                     <li><a class="{{all}}" href="/movies">PHIM</a></li>
                     <li><a class="{{showing}}" href="/movies/showing">ĐANG CHIẾU</a></li>
                     <li><a class="{{upcoming}}" href="/movies/upcoming">SẮP CHIẾU</a></li>
                 </ul>
             </div>
-
-            <div class="col-md-2">
+            <div class="col-md-7"></div>
+            <div class="col-0 col-md-2"></div>
+            {{#if genres.length}}
+            <div class="col-3 col-md-2 pe-0">
                 <select id="genre-filter" class="form-control">
                     <option value="none" selected>Thể Loại</option>
                     {{#each genres}}
-                        <option value="{{this}}">{{this}}</option>
+                    <option value="{{this}}">{{this}}</option>
                     {{/each}}
                 </select>
             </div>
-
-
-            <div class="col-md-2">
+            {{/if}}
+            {{#if ages.length}}
+            <div class="col-3 col-md-2 pe-0">
                 <select id="age-filter" class="form-control">
                     <option value="none" selected>Độ Tuổi</option>
                     {{#each ages}}
-                        <option value="{{this}}">{{this}}</option>
+                    <option value="{{this}}">{{this}}</option>
                     {{/each}}
                 </select>
             </div>
-
-            <div class="col-md-2">
+            {{/if}}
+            {{#if countries.length}}
+            <div class="col-3 col-md-2 pe-0">
                 <select id="country-filter" class="form-control">
                     <option value="none" selected>Quốc Gia</option>
                     {{#each countries}}
-                        <option value="{{this}}">{{this}}</option>
+                    <option value="{{this}}">{{this}}</option>
                     {{/each}}
                 </select>
             </div>
-
-            <div class="col-md-2">
+            {{/if}}
+            <div class="col-3 col-md-2">
                 <select id="rating-filter" class="form-control">
                     <option value="none" selected>Đánh Giá</option>
                     {{#each ratings}}
-                        <option value="{{this}}">{{this}}</option>
+                    <option value="{{this}}">{{this}}</option>
                     {{/each}}
                 </select>
             </div>
-
-            <div class="col-md-1">
+            <div class="col-3 offset-9 offset-md-0 col-md-2 pt-2 pt-md-0">
                 <button id="filter-button" class="btn btn-primary w-100">TÌM</button>
             </div>
         </div>
 
         <div class="row gx-3 gx-sm-4 gy-3 gy-sm-4" id="movie-list">
             {{#if movies.length}}
-                {{#each movies}}
-                    <div class="col-6 col-sm-6 col-xl-3 movie-item" data-genre="{{this.genre}}"
-                         data-age="{{this.limitage_vn}}"
-                         data-rating="{{this.ratings}}" data-country="{{this.type_name_vn}}">
-                        <div class="brief-des">
-                            <a href="/movies/{{this.id}}">
-                                <img src="{{this.image}}" alt="{{this.name_vn}}" class="img-fluid">
-                            </a>
-                            <div class="rating">
-                                {{#if this.ratings}}
-                                    <i class="fa-solid fa-star"></i>
-                                    <p>{{this.ratings}}</p>
-                                {{/if}}
-                            </div>
-                            <div class="age-limit">{{this.limitage_vn}}</div>
-                            <a href="/movies/{{this.id}}">
-                                <div class="text-container">
-                                    <ul>
-                                        <li>
-                                            <p>{{title}}</p>
-                                        </li>
-                                        <li><i class="fa-solid fa-tag"></i> {{type_name_vn}}</li>
-                                        <li><i class="fa-solid fa-clock"></i> {{time}} phút</li>
-                                        <li><i class="fa-solid fa-globe"></i> {{country_name_vn}}</li>
-                                    </ul>
-                                </div>
-                            </a>
-                        </div>
-                        <p class="mv-name">{{this.name_vn}}</p>
+            {{#each movies}}
+            <div class="col-6 col-sm-6 col-xl-3 movie-item">
+                <div class="brief-des">
+                    <a href="/movies/{{this.id}}">
+                        <img src="{{this.image}}" alt="{{this.name_vn}}" class="img-fluid">
+                    </a>
+                    <div class="rating">
+                        {{#if this.ratings}}
+                        <i class="fa-solid fa-star"></i>
+                        <p>{{this.ratings}}</p>
+                        {{/if}}
                     </div>
-                {{/each}}
-            {{else}}
-                <div class="text-box p-0 mt-1 mb-5">
-                    <h1>No Movies Found</h1>
+                    <div class="age-limit">{{this.limitage_vn}}</div>
+                    <a href="/movies/{{this.id}}">
+                        <div class="text-container">
+                            <ul>
+                                <li>
+                                    <p>{{title}}</p>
+                                </li>
+                                <li><i class="fa-solid fa-tag"></i> {{type_name_vn}}</li>
+                                <li><i class="fa-solid fa-clock"></i> {{time}} phút</li>
+                                <li><i class="fa-solid fa-globe"></i> {{country_name_vn}}</li>
+                            </ul>
+                        </div>
+                    </a>
                 </div>
+                <p class="mv-name">{{this.name_vn}}</p>
+            </div>
+            {{/each}}
+            {{else}}
+            <div class="text-box p-0 mt-1 mb-5">
+                <h1>No Movies Found</h1>
+                <h1>No Movies Found</h1>
+            </div>
             {{/if}}
         </div>
 
         <!-- Pagination controls -->
         <nav aria-label="Page navigation">
-            <ul class="pagination justify-content-center" id="pagination">
+            <ul class="pagination justify-content-center">
                 {{#if (gt currentPage 1)}}
-                    <li class="page-item">
-                        <a class="page-link" data-page="{{subtract currentPage 1}}" aria-label="Previous">
-                            <span aria-hidden="true">&laquo;</span>
-                        </a>
-                    </li>
+                <li class="page-item">
+                    <button class="page-link prev-page" aria-label="Previous" data-page="{{subtract currentPage 1}}">
+                        <span aria-hidden="true">&laquo;</span>
+                    </button>
+                </li>
                 {{/if}}
                 {{#each (range 1 totalPages)}}
-                    <li class="page-item {{#if (eq this ../currentPage)}}active{{/if}}">
-                        <a class="page-link" data-page="{{this}}">{{this}}</a>
-                    </li>
+                <li class="page-item {{#if (eq this ../currentPage)}}active{{/if}}">
+                    <button class="page-link page-number" data-page="{{this}}">{{this}}</button>
+                </li>
                 {{/each}}
                 {{#if (lt currentPage totalPages)}}
-                    <li class="page-item">
-                        <a class="page-link" data-page="{{add currentPage 1}}" aria-label="Next">
-                            <span aria-hidden="true">&raquo;</span>
-                        </a>
-                    </li>
+                <li class="page-item">
+                    <button class="page-link next-page" aria-label="Next" data-page="{{add currentPage 1}}">
+                        <span aria-hidden="true">&raquo;</span>
+                    </button>
+                </li>
                 {{/if}}
             </ul>
         </nav>
+
     </div>
 </section>
 
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const movieList = document.getElementById("movie-list");
-        const pagination = document.getElementById("pagination");
-        const filterButton = document.getElementById("filter-button");
-        const searchForm = document.getElementById("search-form");
-        const searchField = document.getElementById("search-field");
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchParams = new URLSearchParams(window.location.search);
+        const genre = searchParams.get('genre') || 'none';
+        const age = searchParams.get('age') || 'none';
+        const rating = searchParams.get('rating') || 'none';
+        const country = searchParams.get('country') || 'none';
 
-        // Fetch movies based on filters and page
-        const fetchMovies = async (page = 1, keyword) => {
-            const genre = document.getElementById('genre-filter')?.value || 'none';
-            const age = document.getElementById('age-filter').value || 'none';
-            const rating = document.getElementById('rating-filter').value || 'none';
-            const country = document.getElementById('country-filter').value || 'none';
-
-            const queryParams = new URLSearchParams();
-            if (keyword)
-                queryParams.append('keyword', keyword);
-            queryParams.append('page', page);
-            if (genre !== 'none') queryParams.append('genre', genre);
-            if (age !== 'none') queryParams.append('age', age);
-            if (country !== 'none') queryParams.append('country', country);
-            if (rating !== 'none') queryParams.append('ratings', rating);
-
-            // update the current url appending the query params
-            window.history.pushState({}, '', `${window.location.pathname}?${queryParams}`);
-
-            let response = await fetch(`/api${window.location.pathname}?${queryParams}`);
-            const data = await response.json();
-            // renderNavFilm(data.all, data.showing, data.upcoming);
-            renderDropdown(data);
-            renderPagination(data.currentPage, data.totalPages);
-            await renderMovies(data.movies);
-            window.scrollTo({top: 0, behavior: 'smooth'});
-
-
-        };
-
-        // Render movies dynamically
-        const renderMovies = async (movies) => {
-            movieList.innerHTML = movies.length
-                    ? movies.map(movie => `
-                    <div class="col-6 col-sm-6 col-xl-3 movie-item" data-genre="${movie.genre}" data-age="${movie.limitage_vn}" data-rating="${movie.ratings}" data-country="${movie.type_name_vn}">
-                        <div class="brief-des">
-                            <a href="/movies/${movie.id}">
-                                <img src="${movie.image}" alt="${movie.name_vn}" class="img-fluid">
-                            </a>
-                            <div class="rating">
-                                ${movie.ratings ? `<i class="fa-solid fa-star"></i><p>${movie.ratings}</p>` : ""}
-                            </div>
-                            <div class="age-limit">${movie.limitage_vn}</div>
-                            <a href="/movies/${movie.id}">
-                                <div class="text-container">
-                                    <ul>
-                                        <li><i class="fa-solid fa-tag"></i> ${movie.type_name_vn}</li>
-                                        <li><i class="fa-solid fa-clock"></i> ${movie.time} phút</li>
-                                        <li><i class="fa-solid fa-globe"></i> ${movie.country_name_vn}</li>
-                                    </ul>
-                                </div>
-                            </a>
-                        </div>
-                        <p class="mv-name">${movie.name_vn}</p>
-                    </div>
-                `).join("")
-                    : '<div class="text-box p-0 mt-1 mb-5"><h1>No Movies Found</h1></div>';
-        };
-
-        // get genres, ages, ratings, countries in res.json and render them in the dropdown
-        const renderDropdown = (data) => {
-            const genres = data.genres.map(genre => `<option value="${genre}">${genre}</option>`).join("");
-            const ages = data.ages.map(age => `<option value="${age}">${age}</option>`).join("");
-            const ratings = data.ratings.map(rating => `<option value="${rating}">${rating}</option>`).join("");
-            const countries = data.countries.map(country => `<option value="${country}">${country}</option>`).join("");
-
-            document.getElementById("genre-filter").innerHTML = `<option value="none" selected>Thể Loại</option>${genres}`;
-            document.getElementById("age-filter").innerHTML = `<option value="none" selected>Độ Tuổi</option>${ages}`;
-            document.getElementById("rating-filter").innerHTML = `<option value="none" selected>Đánh Giá</option>${ratings}`;
-            document.getElementById("country-filter").innerHTML = `<option value="none" selected>Quốc Gia</option>${countries}`;
-
-        };
-
-        // Render pagination dynamically
-        const renderPagination = (currentPage, totalPages) => {
-            pagination.innerHTML = "";
-            if (currentPage > 1) {
-                pagination.innerHTML += `<li class="page-item"><a class="page-link" href="#" data-page="${currentPage - 1}">&laquo;</a></li>`;
-            }
-            for (let i = 1; i <= totalPages; i++) {
-                pagination.innerHTML += `<li class="page-item ${i === currentPage ? "active" : ""}"><a class="page-link" href="#" data-page="${i}">${i}</a></li>`;
-            }
-            if (currentPage < totalPages) {
-                pagination.innerHTML += `<li class="page-item"><a class="page-link" href="#" data-page="${currentPage + 1}">&raquo;</a></li>`;
-            }
-        };
-
-        // Add event listener to pagination links
-        pagination.addEventListener("click", (event) => {
-            const target = event.target;
-
-            // Ensure the clicked element is a pagination link
-            if (target.tagName === "A" && target.dataset.page) {
-                event.preventDefault(); // Prevent default navigation
-
-                const page = parseInt(target.dataset.page, 10); // Get page number
-                if (!isNaN(page)) {
-                    // Update active class for pagination
-                    Array.from(pagination.querySelectorAll(".page-item")).forEach((item) => {
-                        item.classList.remove("active");
-                    });
-                    target.parentElement.classList.add("active");
-
-                    // Fetch movies for the selected page
-                    fetchMovies(page);
-                }
-            }
+        document.getElementById('genre-filter').value = genre;
+        document.getElementById('age-filter').value = age;
+        document.getElementById('rating-filter').value = rating;
+        document.getElementById('country-filter').value = country;
+        // Attach click event to filter button
+        document.getElementById('filter-button').addEventListener('click', function () {
+            fetchMovies(); // Reset to page 1 when filters change
         });
+        attachPaginationListeners();
 
-        filterButton.addEventListener("click", async () => {
-            await fetchMovies();
-            // Get current URL query parameters
-            const urlParams = new URLSearchParams(window.location.search);
-            // Pre-select values from the URL
-            const genre = urlParams.get('genre') || 'none';
-            const age = urlParams.get('age') || 'none';
-            const rating = urlParams.get('rating') || 'none';
-            const country = urlParams.get('country') || 'none';
-            // Set the form fields to match the URL parameters
-            if (genre !== 'none') {
-                document.getElementById('genre-filter').value = genre;
-            }
-            if (age !== 'none') {
-                document.getElementById('age-filter').value = age;
-            }
-            if (rating !== 'none') {
-                document.getElementById('rating-filter').value = rating;
-            }
-            if (country !== 'none') {
-                document.getElementById('country-filter').value = country;
-            }
-        });
-        // Add event listener to search form
-        searchForm.addEventListener("submit", (event) => {
-            event.preventDefault();
-            const keyword = searchField.value.trim();
-            if (keyword) {
-                fetchMovies(undefined, keyword);
-            }
-        });
-        // filterButton.addEventListener('click', function () {
-        //     // Get values from the form elements
-        //     const genre = document.getElementById('genre-filter')?.value || 'none';
-        //     const age = document.getElementById('age-filter').value || 'none';
-        //     const rating = document.getElementById('rating-filter').value || 'none';
-        //     const country = document.getElementById('country-filter').value || 'none';
-        //     const queryParams = new URLSearchParams();
-        //
-        //     // Append filter values to queryParams if not 'none'
-        //     if (genre !== 'none') {
-        //         queryParams.append('genre', genre);
-        //     }
-        //     if (age !== 'none') {
-        //         queryParams.append('age', age);
-        //     }
-        //     if (country !== 'none') {
-        //         queryParams.append('country', country);
-        //     }
-        //     if (rating !== 'none') {
-        //         queryParams.append('rating', rating);
-        //     }
-        //
-        //     // Get the current path
-        //     const currentPath = window.location.href;
-        //     let url = `/search?${queryParams}`;
-        //
-        //     // Adjust URL based on the current path (showing, upcoming, etc.)
-        //     if (currentPath.includes('/showing')) {
-        //         url = `/search/showing?${queryParams}`;
-        //     } else if (currentPath.includes('/upcoming')) {
-        //         url = `/search/upcoming?${queryParams}`;
-        //     } else if (currentPath.includes('/search?keyword')) {
-        //         // Handle case where URL already contains search parameters (e.g., search?keyword=value)
-        //         const currentUrl = new URL(window.location.href);
-        //         // Combine existing search parameters with new ones
-        //         const existingParams = new URLSearchParams(currentUrl.search);
-        //         queryParams.forEach((value, key) => {
-        //             existingParams.set(key, value);  // Use set to ensure they are updated
-        //         });
-        //         currentUrl.search = existingParams.toString();
-        //         url = currentUrl.toString(); // Get the updated URL with combined query parameters
-        //     }
-        //     // Use fetch to send the request (optional, for dynamic data handling)
-        //     window.location.href = url;
-        // });
     });
+
+    function fetchMovies(page = 1) {
+        const searchParams = new URLSearchParams(window.location.search)
+        const keyword = searchParams.get('keyword');
+        const genre = document.getElementById('genre-filter')?.value || 'none';
+        const age = document.getElementById('age-filter').value || 'none';
+        const rating = document.getElementById('rating-filter').value || 'none';
+        const country = document.getElementById('country-filter').value || 'none';
+
+        let queryParams = new URLSearchParams();
+        if (keyword) queryParams.append('keyword', keyword);
+        if (genre !== 'none') queryParams.append('genre', genre);
+        if (age !== 'none') queryParams.append('age', age);
+        if (country !== 'none') queryParams.append('country', country);
+        if (rating !== 'none') queryParams.append('rating', rating);
+        if (page != 1) {
+            queryParams.append('page', page);
+        }
+
+        let queryUrl = queryParams.toString() ? `${window.location.pathname}?${queryParams.toString()}` : window.location.pathname;
+        window.history.pushState({ path: queryUrl }, '', queryUrl);
+
+        fetch(`/api${queryUrl}`)
+            .then(response => response.json())
+            .then(data => {
+                renderMovies(data.movies);
+                renderPagination(data.currentPage, data.totalPages);
+            })
+            .catch(error => {
+                console.error('Error fetching movies:', error);
+                document.getElementById('movie-list').innerHTML = `
+                    <div class="text-box p-0 mt-1 mb-5">
+                        <h1>Error loading movies. Please try again later.</h1>
+                    </div>
+                `;
+            });
+    }
+
+    function renderMovies(movies) {
+        const movieList = document.getElementById('movie-list');
+        movieList.innerHTML = '';
+
+        if (movies.length) {
+            movies.forEach(movie => {
+                const movieItem = document.createElement('div');
+                movieItem.className = 'col-6 col-sm-6 col-xl-3 movie-item';
+                movieItem.innerHTML = `
+                    <div class="brief-des">
+                        <a href="/movies/${movie.id}">
+                            <img src="${movie.image}" alt="${movie.name_vn}" class="img-fluid">
+                        </a>
+                        <div class="rating">
+                            ${movie.ratings ? `<i class="fa-solid fa-star"></i><p>${movie.ratings}</p>` : ''}
+                        </div>
+                        <div class="age-limit">${movie.limitage_vn}</div>
+                        <a href="/movies/${movie.id}">
+                            <div class="text-container">
+                                <ul>
+                                    <li><i class="fa-solid fa-tag"></i> ${movie.type_name_vn}</li>
+                                    <li><i class="fa-solid fa-clock"></i> ${movie.time} phút</li>
+                                    <li><i class="fa-solid fa-globe"></i> ${movie.country_name_vn}</li>
+                                </ul>
+                            </div>
+                        </a>
+                    </div>
+                    <p class="mv-name">${movie.name_vn}</p>
+                `;
+                movieList.appendChild(movieItem);
+            });
+        } else {
+            movieList.innerHTML = `
+                <div class="text-box p-0 mt-1 mb-5">
+                    <h1>No Movies Found</h1>
+                    <h1>No Movies Found</h1>
+                </div>
+            `;
+        }
+    }
+
+    function renderPagination(currentPage, totalPages) {
+        const pagination = document.querySelector('.pagination.justify-content-center');
+        pagination.innerHTML = '';
+
+        // Add previous page button
+        if (currentPage > 1) {
+            const prevPageItem = document.createElement('li');
+            prevPageItem.className = 'page-item';
+            prevPageItem.innerHTML = `
+                <button class="page-link prev-page" aria-label="Previous" data-page="${currentPage - 1}">
+                    <span aria-hidden="true">&laquo;</span>
+                </button>
+            `;
+            pagination.appendChild(prevPageItem);
+        }
+
+        // Add page number buttons
+        for (let i = 1; i <= totalPages; i++) {
+            const pageItem = document.createElement('li');
+            pageItem.className = `page-item ${i === currentPage ? 'active' : ''}`;
+            pageItem.innerHTML = `<button class="page-link page-number" data-page="${i}">${i}</button>`;
+            pagination.appendChild(pageItem);
+        }
+
+        // Add next page button
+        if (currentPage < totalPages) {
+            const nextPageItem = document.createElement('li');
+            nextPageItem.className = 'page-item';
+            nextPageItem.innerHTML = `
+                <button class="page-link next-page" aria-label="Next" data-page="${currentPage + 1}">
+                    <span aria-hidden="true">&raquo;</span>
+                </button>
+            `;
+            pagination.appendChild(nextPageItem);
+        }
+
+        attachPaginationListeners();
+    }
+
+    function attachPaginationListeners() {
+        document.querySelectorAll('.page-link').forEach(button => {
+            button.addEventListener('click', (event) => {
+                const page = event.target.closest('button').getAttribute('data-page');
+                fetchMovies(page);
+            });
+        });
+    }
 </script>

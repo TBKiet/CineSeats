@@ -1,11 +1,13 @@
-const MovieService = require("./movies.service");
-const {getPageFromReq, getQueryFromReq} = require("../../utility/extractRequest");
-
-const renderMovieListByType = async (req, res, movieType) => {
+exports.renderMovieList = async (req, res) => {
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const apiMovieUrl = `${baseUrl}/api${req.originalUrl}`;
     try {
-        const page = getPageFromReq(req);
-        const query = getQueryFromReq(req);
-        const movieData = await MovieService.getMovieListsByType(movieType, page, undefined, query);
+        const movieResponse = await fetch(apiMovieUrl);
+        if (!movieResponse.ok) {
+            throw new Error(`Response status: ${movieResponse.status}`);
+        }
+
+        const movieData = await movieResponse.json();
         res.render("movie-list", {
             layout: "main", ...movieData
         });
@@ -15,25 +17,22 @@ const renderMovieListByType = async (req, res, movieType) => {
     }
 };
 
-exports.renderMovieList = async (req, res) =>
-    renderMovieListByType(req, res, "all");
-
-exports.renderShowingMovieList = async (req, res) =>
-    renderMovieListByType(req, res, "showing");
-
-exports.renderUpcomingMovieList = async (req, res) =>
-    renderMovieListByType(req, res, "upcoming");
-
 exports.renderMoviePage = async (req, res) => {
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const apiMovieUrl = `${baseUrl}/api${req.originalUrl}`;
+    const movieId = req.params.id;
     try {
-        const movieId = req.params.id;
-        const movie = await MovieService.getMovieById(movieId);
-        if (!movie) {
-            return res
-                .status(404)
-                .render("404", {layout: "main", message: "Movie not found"});
+        const movieResponse = await fetch(apiMovieUrl);
+        const showtimeResponse = await fetch(`${baseUrl}/api/showtime?movieId=${movieId}`);
+        if (!movieResponse.ok) {
+            throw new Error(`Movie response status: ${movieResponse.status}`);
         }
-        res.render("movie-details", {layout: "main", ...movie});
+        if (!showtimeResponse.ok) {
+            throw new Error(`Showtime response status: ${showtimeResponse.status}`);
+        }
+        const movieData = await movieResponse.json();
+        const showtimeData = await showtimeResponse.json();
+        res.render("movie-details", { layout: "main", ...movieData, ...showtimeData.data });
     } catch (error) {
         console.error("Error fetching movie:", error);
         res.status(500).send("Internal server error");
