@@ -58,23 +58,3 @@
         </nav>
     </aside>
 </section>
-
-<script>
-    document.addEventListener("DOMContentLoaded", async () => {
-        try {
-            // Fetch user data from backend
-            const response = await fetch("/account/info", { method: "GET" });
-            if (!response.ok) throw new Error("Failed to fetch user info");
-
-            const user = await response.json();
-
-            // Update the sidebar with user info
-            document.getElementById("user-name").textContent = `${user.username}`;
-            document.getElementById("user-avatar").src = user.avatar_url || "https://placehold.co/40x40";
-            document.getElementById("user-role").textContent = user.role || "Member";
-        } catch (error) {
-            console.error("Error loading user data:", error);
-            alert("Failed to load user data.");
-        }
-    });
-</script>

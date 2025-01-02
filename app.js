@@ -80,8 +80,8 @@ app.engine(
                 return number < 10 ? '0' + number : number;
             },
             assignSeatId: (index) => {
-                if (index == 3 || index == 4) return 'seat-top-left';
-                if (index == 8) return 'seat-bottom-right';
+                if (index === 3 || index === 4) return 'seat-top-left';
+                if (index === 8) return 'seat-bottom-right';
                 return '';
             }
         },

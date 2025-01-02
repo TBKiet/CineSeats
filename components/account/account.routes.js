@@ -10,7 +10,7 @@ router.get("/general", renderGeneral);
 //router.get("/setting", renderSetting);
 //router.get("/history", renderHistory);
 
-router.get("/info", getAccountInfo);
-router.post("/update", uploadAvatar.single('avatar_url'), updateAccountInfo);
+// router.get("/info", getAccountInfo);
+// router.post("/update", uploadAvatar.single('avatar_url'), updateAccountInfo);
 
 module.exports = router;
