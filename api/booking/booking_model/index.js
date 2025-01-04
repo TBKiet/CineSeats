@@ -12,8 +12,8 @@ const sequelize = require('../../../config/cineseatsDBConnection');
 // Define Associations
 
 // User <-> Booking
-User.hasMany(Booking, { foreignKey: 'userId' });
-Booking.belongsTo(User, { foreignKey: 'userId' });
+User.hasMany(Booking, { foreignKey: 'username' });
+Booking.belongsTo(User, { foreignKey: 'username' });
 
 // Movie <-> Showtime
 Movie.hasMany(Showtime, { foreignKey: 'movieId' });

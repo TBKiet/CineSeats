@@ -1,7 +1,8 @@
-const User = require('../../api/booking/booking_model/User');
-const Booking = require('../../api/booking/booking_model/Booking');
+const {Ticket, User, Booking} = require("../../api/booking/booking_model");
 const {cloudinary} = require('../cloudinary/config/cloud');
 const bcrypt = require('bcrypt');
+// Add associations in Sequelize models
+
 
 const getInfo = async (req, res) => {
     try {
@@ -16,7 +17,7 @@ const getInfo = async (req, res) => {
         res.status(500).send("Error getting user info");
     }
 };
-// Function to render the general account information view
+
 const renderGeneral = async (req, res) => {
     try {
         if (req.isAuthenticated()) {
@@ -30,7 +31,6 @@ const renderGeneral = async (req, res) => {
     }
 };
 
-// Function to update user account information
 const updateAccountInfo = async (req, res) => {
     try {
         if (req.isAuthenticated()) {
@@ -61,8 +61,6 @@ const updateAccountInfo = async (req, res) => {
     }
 };
 
-
-// render the change password view
 const renderChangePassword = async (req, res) => {
     try {
         if (req.isAuthenticated()) {
@@ -76,7 +74,6 @@ const renderChangePassword = async (req, res) => {
     }
 };
 
-// Function to update user password
 const updatePassword = async (req, res) => {
     try {
         if (req.isAuthenticated()) {
@@ -106,16 +103,10 @@ const updatePassword = async (req, res) => {
         res.status(500).send("Error updating password");
     }
 };
-
-
-// Function to render the booking history view
 const renderBookingHistory = async (req, res) => {
     try {
         if (req.isAuthenticated()) {
-            const bookings = await Booking.findAll({
-                where: {username: req.user.username}, include: [{model: User, attributes: ['name', 'email']}]
-            });
-            res.render('account/booking-history', {bookings});
+            res.render('account/booking-history');
         } else {
             res.redirect('/login');
         }
@@ -123,8 +114,100 @@ const renderBookingHistory = async (req, res) => {
         console.error("Error loading booking history:", error);
         res.status(500).send("Error loading booking history.");
     }
+}
+const getBookingHistory = async (req, res) => {
+    const username = req.user.username; // Assuming user info is stored in `req.user`
+
+    try {
+        const bookings = await Booking.findAll({
+            where: {username: username},
+        });
+        const example_booking = [
+            {
+                bookingID: 1,
+                totalAmount: 100000,
+                paymentStatus: 'paid',
+                paymentMethod: "Momo",
+                bookingDateTime: '2021-08-30 10:00:00',
+            },
+            {
+                bookingID: 2,
+                totalAmount: 200000,
+                paymentStatus: 'pending',
+                paymentMethod: "VNPay",
+                bookingDateTime: '2021-08-30 10:00:00',
+            },
+            {
+                bookingID: 3,
+                totalAmount: 300000,
+                paymentStatus: 'paid',
+                paymentMethod: "Credit Card",
+                bookingDateTime: '2021-08-30 10:00:00',
+            },
+            {
+                bookingID: 4,
+                totalAmount: 400000,
+                paymentStatus: 'paid',
+                paymentMethod: "Credit Card",
+                bookingDateTime: '2021-08-30 10:00:00',
+            },
+            {
+                bookingID: 5,
+                totalAmount: 500000,
+                paymentStatus: 'paid',
+                paymentMethod: "Credit Card",
+                bookingDateTime: '2021-08-30 10:00:00',
+            },
+            {
+                bookingID: 6,
+                totalAmount: 600000,
+                paymentStatus: 'paid',
+                paymentMethod: "Credit Card",
+                bookingDateTime: '2021-08-30 10:00:00',
+            },
+            {
+                bookingID: 7,
+                totalAmount: 700000,
+                paymentStatus: 'paid',
+                paymentMethod: "Credit Card",
+                bookingDateTime: '2021-08-30 10:00:00',
+            },
+            {
+                bookingID: 8,
+                totalAmount: 700000,
+                paymentStatus: 'paid',
+                paymentMethod: "Credit Card",
+                bookingDateTime: '2021-08-30 10:00:00',
+            },
+            {
+                bookingID: 9,
+                totalAmount: 700000,
+                paymentStatus: 'paid',
+                paymentMethod: "Credit Card",
+                bookingDateTime: '2021-08-30 10:00:00',
+            },
+            {
+                bookingID: 10,
+                totalAmount: 700000,
+                paymentStatus: 'paid',
+                paymentMethod: "Credit Card",
+                bookingDateTime: '2021-08-30 10:00:00',
+            },
+
+        ];
+        res.json(example_booking);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({error: 'Failed to fetch booking history.'});
+    }
 };
 
 module.exports = {
-    renderGeneral, updateAccountInfo, renderBookingHistory, getInfo, renderChangePassword, updatePassword
+    renderGeneral,
+    updateAccountInfo,
+    renderBookingHistory,
+    getBookingHistory,
+    getInfo,
+    renderChangePassword,
+    updatePassword
 };

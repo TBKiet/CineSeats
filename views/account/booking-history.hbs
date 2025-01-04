@@ -1,0 +1,73 @@
+<section class="d-flex">
+    {{> sidebar2 }}
+    <div class="flex flex-md-row p-0">
+        <!-- Booking History Section -->
+        <section class="p-4 bg-white rounded shadow" style="max-width: 1000px; margin: 0 auto;">
+            <h1 class="mb-4 fw-bold">Booking History</h1>
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Booking ID</th>
+                    <th>Total Amount</th>
+                    <th>Payment Method</th>
+                    <th>Payment Status</th>
+                    <th>Booking Date</th>
+                </tr>
+                </thead>
+                <tbody id="booking-history-body">
+                <!-- Booking history will be populated here -->
+                </tbody>
+            </table>
+        </section>
+    </div>
+</section>
+<style>
+    .table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    .table th, .table td {
+        text-align: left;
+        padding: 8px;
+    }
+
+    .table th {
+        background-color: #f4f4f4;
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: #f9f9f9;
+    }
+</style>
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const bookingHistoryBody = document.getElementById("booking-history-body");
+
+        try {
+            const response = await fetch('/account/booking', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok)
+                alert('Failed to fetch booking history');
+
+            const data = await response.json();
+            bookingHistoryBody.innerHTML = data.map(booking => `
+            <tr>
+                <td>${booking.bookingID}</td>
+                <td>${booking.totalAmount.toFixed(2)}</td>
+                <td>${booking.paymentMethod}</td>
+                <td>${booking.paymentStatus}</td>
+                <td>${new Date(booking.bookingDateTime).toLocaleDateString()}</td>
+            </tr>
+        `).join('');
+        } catch (error) {
+            bookingHistoryBody.innerHTML = `<tr><td colspan="6" class="text-danger">${error.message}</td></tr>`;
+        }
+    });
+
+</script>
