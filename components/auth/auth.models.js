@@ -1,16 +1,11 @@
-const { DataTypes } = require('sequelize');
+const {DataTypes} = require('sequelize');
 const sequelize = require('../../config/cineseatsDBConnection'); // Update with your Sequelize connection
 
 const User = sequelize.define('User', {
-    userID: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
-    },
     username: {
         type: DataTypes.STRING(50),
         allowNull: false,
-        unique: true,
+        primaryKey: true
     },
     email: {
         type: DataTypes.STRING(100),

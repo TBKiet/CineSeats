@@ -85,15 +85,15 @@ const renderResetPassword = async (req, res) => {
         return res.redirect('/forgot-password');
     }
 
-    req.session.userID = user.userID;
+    req.session.username = user.username;
     res.render('reset-password', {layout: 'main'});
 };
 
 const resetPassword = async (req, res) => {
     const {password, re_password} = req.body;
-    const userID = req.session.userID;
+    const username = req.session.username;
 
-    if (!userID) {
+    if (!username) {
         return res.redirect('/forgot-password');
     }
 
@@ -110,7 +110,7 @@ const resetPassword = async (req, res) => {
     }
 
     try {
-        const user = await User.findByPk(userID);
+        const user = await User.findOne({where: {username}});
 
         if (!user) {
             return res.redirect('/forgot-password');
@@ -123,7 +123,7 @@ const resetPassword = async (req, res) => {
             activationExpires: null,
         });
 
-        req.session.userID = null;
+        req.session.username = null;
         res.render('login', {alert: 'Password reset successfully', alertType: 'success'});
     } catch (err) {
         console.error(err);
@@ -158,7 +158,7 @@ const verifyEmail = async (req, res) => {
             activationExpires: null,
         });
 
-        res.status(200).json({message: 'Email verified successfully. You can now log in.'});
+        res.redirect('/login');
     } catch (err) {
         console.error(err);
         res.status(500).json({message: 'Error verifying email'});

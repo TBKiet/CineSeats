@@ -12,13 +12,13 @@ const Booking = sequelize.define('Booking', {
             notEmpty: true,
         }
     },
-    userId: {
-        field: 'UserID',
-        type: DataTypes.STRING(10),
+    username: {
+        field: 'username',
+        type: DataTypes.STRING(50),
         allowNull: false,
         references: {
             model: User,
-            key: 'userID'
+            key: 'username'
         },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'

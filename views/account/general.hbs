@@ -1,23 +1,11 @@
-<!-- filepath: /c:/Users/quock/OneDrive/Desktop/CineSeats/views/account/general.hbs -->
 <section class="d-flex">
     {{> sidebar2 }}
-    <div class="d-flex flex-md-row p-0">
+    <div class="d-flex flex-md-row p-0 m-3">
         <!-- User Info Section -->
         <section class="container col-md-4 m-5 py-4 bg-white rounded shadow">
-            <div class="d-flex justify-content-center align-items-center mb-4">
-                <img id="profile-picture" src="{{user.avatar_url}}" alt="User" class="rounded-circle me-2"
-                     style="width: 100px; height: 100px;"/>
-                <div>
-                    <div class="fw-bold" id="user-full-name">{{user.name}}</div>
-                    <div class="small" id="role">
-                        <i class="fa-solid fa-medal"></i>{{user.role}}
-                    </div>
-                </div>
-            </div>
-            <hr>
             <div class="text-center m-4 pb-4 d-flex justify-content-between align-items-center">
                 <h3 class="h6 mb-0">Tổng chi tiêu 2024 <i class="fas fa-info-circle text-muted small"></i></h3>
-                <p class="text-warning fs-5 fw-bold mb-0" id="user-spent">{{user.accumulated_points}} đ</p>
+                <p class="text-warning fs-5 fw-bold mb-0" id="user-spent">0 đ</p>
             </div>
             <!-- Progress Bar Section -->
             <div class="position-relative m-4">
@@ -27,13 +15,11 @@
                     <i class="fas fa-tools text-warning fs-4"></i>
                 </div>
                 <div class="progress" style="height: 8px;">
-                    <div id="progress-bar" class="progress-bar bg-primary" role="progressbar"></div>
+                    <div id="progress-bar" class="progress-bar bg-primary" role="progressbar" style="width: 0%;"></div>
                 </div>
                 <div class="d-flex justify-content-between position-absolute w-100" style="top: -5px;">
-                    <span class="rounded-circle bg-white border border-primary"
-                          style="width: 16px; height: 16px;"></span>
-                    <span class="rounded-circle bg-white border border-primary"
-                          style="width: 16px; height: 16px;"></span>
+                    <span class="rounded-circle bg-white border border-primary" style="width: 16px; height: 16px;"></span>
+                    <span class="rounded-circle bg-white border border-primary" style="width: 16px; height: 16px;"></span>
                 </div>
             </div>
             <div class="d-flex justify-content-between m-4 text-secondary small">
@@ -49,7 +35,7 @@
             <form id="user-info-form" enctype="multipart/form-data">
                 <div class="d-flex align-items-center mb-4">
                     <div class="position-relative">
-                        <img id="profile-picture-edit" src="{{user.avatar_url}}" alt="Profile picture"
+                        <img id="profile-picture-edit" src="https://placehold.co/100x100" alt="Profile picture"
                              class="rounded-circle me-3" style="width: 100px; height: 100px;"/>
                         <label for="upload-profile-picture"
                                class="fas fa-camera position-absolute bottom-0 end-0 bg-white p-2 rounded-circle text-secondary border"></label>
@@ -62,8 +48,8 @@
                     <div class="col-md-6">
                         <label class="form-label text-secondary">Name</label>
                         <div class="position-relative">
-                            <input id="first-name" name="name" type="text" class="form-control pe-5"
-                                   style="height: 40px;" value="{{user.name}}"/>
+                            <input id="name" name="name" type="text" class="form-control pe-5"
+                                   style="height: 40px;" value=""/>
                             <i class="fas fa-user position-absolute"
                                style="top: 50%; right: 10px; transform: translateY(-50%); color: #6c757d;"></i>
                         </div>
@@ -72,8 +58,7 @@
                     <div class="col-md-6">
                         <label class="form-label text-secondary">Email</label>
                         <div class="position-relative">
-                            <input id="email" name="email" type="email" class="form-control pe-5"
-                                   value="{{user.email}}"/>
+                            <input id="email" name="email" type="email" class="form-control pe-5" value=""/>
                             <i class="fas fa-envelope position-absolute"
                                style="top: 50%; right: 10px; transform: translateY(-50%); color: #6c757d;"></i>
                         </div>
@@ -82,8 +67,7 @@
                     <div class="col-md-6">
                         <label class="form-label text-secondary">Phone Number</label>
                         <div class="position-relative">
-                            <input id="phone" name="phone" type="text" class="form-control pe-5"
-                                   value="{{user.phone}}"/>
+                            <input id="phone" name="phone" type="text" class="form-control pe-5" value=""/>
                             <i class="fas fa-phone position-absolute"
                                style="top: 50%; right: 10px; transform: translateY(-50%); color: #6c757d;"></i>
                         </div>
@@ -96,28 +80,39 @@
 </section>
 
 <script>
-    document.addEventListener("DOMContentLoaded", async () => {
+    document.addEventListener('DOMContentLoaded', async () => {
         try {
+            const response = await fetch('/account/info');
+            if (response.ok) {
+                const user = await response.json();
+                document.getElementById('name').value = user.name;
+                document.getElementById('email').value = user.email;
+                document.getElementById('phone').value = user.phone;
+                document.getElementById('profile-picture-edit').src = user.avatar_url || 'https://placehold.co/100x100';
+                document.getElementById('user-spent').textContent = user.accumulated_points + ' đ';
 
-            // Populate user info card
-
-            const avatarUrl = "https://placehold.co/100x100";
-            document.getElementById("profile-picture").src = avatarUrl;
-            document.getElementById("profile-picture-edit").src = avatarUrl;
-            // Populate progress bar
-            const progressBar = document.getElementById("progress-bar");
-            const userSpent = document.getElementById("user-spent");
-            const accumulated_points = documents.getElementById("accumulated_points");
-
-            const maxSpent = 4000000;
-            const progress = (user.accumulated_points / maxSpent) * 100;
-            progressBar.style.width = `${progress}%`;
-            userSpent.textContent = `${user.accumulated_points} đ`;
-
-
+            } else {
+                console.error('Failed to fetch user info');
+            }
         } catch (error) {
-            console.error("Error loading user data:", error);
-            alert("Failed to load user data.");
+            console.error('Error fetching user info:', error);
+        }
+    });
+
+    document.getElementById('user-info-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(event.target);
+        const response = await fetch('/account/update', {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (response.ok) {
+            alert('Profile updated successfully');
+            window.location.reload();
+        } else {
+            alert('Failed to update profile');
         }
     });
 </script>

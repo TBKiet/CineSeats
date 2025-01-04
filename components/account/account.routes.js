@@ -1,16 +1,15 @@
 const express = require("express");
 const router = express.Router();
-const { renderGeneral, getAccountInfo, updateAccountInfo } = require("./account.controllers");
-const { uploadAvatar } = require('../cloudinary/config/cloud');
+const { renderGeneral, updateAccountInfo, renderChangePassword, updatePassword, getInfo } = require("./account.controllers");
+const {uploadAvatar} = require("../cloudinary/config/cloud");
 
 // Routes for rendering pages
+router.get("/info", getInfo);
 router.get("/general", renderGeneral);
-//router.get("/membership", renderMembership);
-//router.get("/voucher", renderVoucher);
-//router.get("/setting", renderSetting);
-//router.get("/history", renderHistory);
-
-// router.get("/info", getAccountInfo);
-// router.post("/update", uploadAvatar.single('avatar_url'), updateAccountInfo);
+router.get("/change-password", renderChangePassword);
+router.post("/change-password", updatePassword);
+// router.get("/booking-history", renderBookingHistory);
+router.post("/update", uploadAvatar.single('avatar_url'), updateAccountInfo);
+// router.get("/history", getBookingHistory);
 
 module.exports = router;

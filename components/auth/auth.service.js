@@ -20,10 +20,10 @@ passport.use(new LocalStrategy(async (username, password, done) => {
     }
 }));
 
-passport.serializeUser((user, done) => done(null, user.userID));
-passport.deserializeUser(async (userID, done) => {
+passport.serializeUser((user, done) => done(null, user.username));
+passport.deserializeUser(async (username, done) => {
     try {
-        const user = await User.findByPk(userID);
+        const user = await User.findOne({ where: { username } });
         done(null, user);
     } catch (err) {
         done(err);
