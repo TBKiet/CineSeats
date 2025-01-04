@@ -22,28 +22,28 @@ passport.use(new LocalStrategy(async (username, password, done) => {
 }));
 
 passport.use(new GoogleStrategy({
-        clientID: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: "/auth/google/callback"
-    },
-    async (token, tokenSecret, profile, done) => {
-        try {
-            let user = await User.findOne({where: {email: profile.emails[0].value}});
-            if (!user) {
-                user = await User.create({
-                    username: profile.emails[0].value,
-                    email: profile.emails[0].value,
-                    password: profile.id,
-                    name: profile.displayName,
-                    avatar_url: profile.photos[0].value,
-                    isActive: true
-                });
-            }
-            return done(null, user);
-        } catch (err) {
-            return done(err);
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: "https://cineseats-production.up.railway.app/auth/google/callback"
+}, async (token, tokenSecret, profile, done) => {
+    try {
+        let user = await User.findOne({where: {email: profile.emails[0].value}});
+        const randomPassword = crypto.randomBytes(16).toString('hex');
+        if (!user) {
+            user = await User.create({
+                username: profile.emails[0].value,
+                email: profile.emails[0].value,
+                password: randomPassword,
+                name: profile.displayName,
+                avatar_url: profile.photos[0].value,
+                isActive: true
+            });
         }
-    }));
+        return done(null, user);
+    } catch (err) {
+        return done(err);
+    }
+}));
 
 passport.serializeUser((user, done) => done(null, user.username));
 passport.deserializeUser(async (username, done) => {
@@ -84,10 +84,7 @@ async function registerHandler(username, email, password, re_password, res, req)
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
         const newUser = await User.create({
-            username,
-            email,
-            password: hashedPassword,
-            isActive: false,
+            username, email, password: hashedPassword, isActive: false,
         });
 
         const verificationToken = crypto.randomBytes(32).toString('hex');
@@ -95,17 +92,14 @@ async function registerHandler(username, email, password, re_password, res, req)
         const expires = Date.now() + 10 * 60 * 1000;
 
         await newUser.update({
-            activationToken: hashedToken,
-            activationExpires: expires,
+            activationToken: hashedToken, activationExpires: expires,
         });
 
         const verificationUrl = `${req.protocol}://${req.get('host')}/verify?token=${verificationToken}`;
         const message = `Please click this link to verify your email: ${verificationUrl}`;
 
         await sendEmail({
-            email: newUser.email,
-            subject: 'Email Verification',
-            message,
+            email: newUser.email, subject: 'Email Verification', message,
         });
 
         renderAlert('Register successful! Please check your email for verification.', 'success');
