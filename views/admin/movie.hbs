@@ -75,8 +75,8 @@
                             {{#each movies}}
                             <tr>
                                 <td>{{name_vn}}</td>
-                                <td>{{type_name_en}}</td>
-                                <td>{{country_name_en}}</td>
+                                <td>{{type_name_vn}}</td>
+                                <td>{{country_name_vn}}</td>
                                 <td>{{price}}</td>
                                 <td>{{totalPurchases}}</td>
                                 <td>{{release_date}}</td>
@@ -122,8 +122,8 @@
                 const row = `
                 <tr>
                     <td>${movie.name_vn}</td>
-                    <td>${movie.type_name_en}</td>
-                    <td>${movie.country_name_en}</td>
+                    <td>${movie.type_name_vn}</td>
+                    <td>${movie.country_name_vn}</td>
                     <td>${movie.price}</td>
                     <td>${movie.totalPurchases}</td>
                     <td>${new Date(movie.release_date).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}</td>
@@ -204,71 +204,76 @@
         const showEditForm = (movie) => {
             const content = document.querySelector(".content");
             content.innerHTML = `
-    <div class="content">
-        <h1>Edit Movie: ${movie.name_vn}</h1>
-        <div class="container-admin">
-            <form id="edit-movie-form" class="form-container-movie-manager">
-                <div class="form-group-movie-manager">
-                    <label for="name-vn">Name (VN):</label>
-                    <input type="text" id="name-vn" value="${movie.name_vn}">
+            <div class="content">
+                <h1>Edit Movie: ${movie.name_vn}</h1>
+                <div class="container-admin">
+                    <form id="edit-movie-form" class="form-container-movie-manager">
+                        <div class="form-group-movie-manager">
+                            <label for="name-vn">Name (VN):</label>
+                            <input type="text" id="name-vn" value="${movie.name_vn}">
+                        </div>
+                        <div class="form-group-movie-manager">
+                            <label for="name-en">Name (EN):</label>
+                            <input type="text" id="name-en" value="${movie.name_en}">
+                        </div>
+                        <div class="form-group-movie-manager">
+                            <label for="director">Director:</label>
+                            <input type="text" id="director" value="${movie.director}">
+                        </div>
+                        <div class="form-group-movie-manager">
+                            <label for="actor">Actor:</label>
+                            <input type="text" id="actor" value="${movie.actor}">
+                        </div>
+                        <div class="form-group-movie-manager">
+                            <label for="release-date">Release Date:</label>
+                            <input type="date" id="release-date" value="${new Date(movie.release_date).toISOString().split('T')[0]}">
+                        </div>
+                        <div class="form-group-movie-manager">
+                            <label for="country">Country:</label>
+                            <input type="text" id="country" value="${movie.country_name_vn}">
+                        </div>
+                        <div class="form-group-movie-manager">
+                            <label for="genre">Genre:</label>
+                            <input type="text" id="genre" value="${movie.type_name_vn.join(', ')}">
+                        </div>
+                        <div class="form-group-movie-manager">
+                            <label for="trailer">Trailer:</label>
+                            <input type="text" id="trailer" value="${movie.trailer}">
+                        </div>
+                        <div class="form-group-movie-manager">
+                            <label for="ratings">Ratings:</label>
+                            <input type="text" id="ratings" value="${movie.ratings}">
+                        </div>
+                        <div class="form-group-movie-manager">
+                            <label for="time">Time (minutes):</label>
+                            <input type="number" id="time" value="${movie.time}">
+                        </div>
+                        <div class="form-group-movie-manager">
+                            <label for="brief-vn">Brief (VN):</label>
+                            <textarea id="brief-vn">${movie.brief_vn}</textarea>
+                        </div>
+                        <div class="form-group-movie-manager">
+                            <label for="brief-en">Brief (EN):</label>
+                            <textarea id="brief-en">${movie.brief_en}</textarea>
+                        </div>
+                        <div class="form-group-movie-manager">
+                            <label for="movie-image">Image:</label>
+                            <input type="file" name="movieImage" id="movie-image" accept="image/*">
+                            ${movie.image ? `<img src="${movie.image}" alt="Current Image" width="100" height="100">` : ''}
+                        </div>
+                        <div class="form-group-movie-manager">
+                            <label for="background-image">Background Image:</label>
+                            <input type="file" name="backgroundImage" id="background-image" accept="image/*">
+                            ${movie.background_image_url ? `<img src="${movie.background_image_url}" alt="Current Background Image" width="100" height="100">` : ''}
+                            </div>
+                        <div class="form-action-movie-manager">
+                            <button type="submit" class="btn btn-primary">Save</button>
+                            <button type="button" class="btn btn-secondary" id="cancel-edit">Cancel</button>
+                        </div>
+                    </form>
                 </div>
-                <div class="form-group-movie-manager">
-                    <label for="name-en">Name (EN):</label>
-                    <input type="text" id="name-en" value="${movie.name_en}">
-                </div>
-                <div class="form-group-movie-manager">
-                    <label for="director">Director:</label>
-                    <input type="text" id="director" value="${movie.director}">
-                </div>
-                <div class="form-group-movie-manager">
-                    <label for="actor">Actor:</label>
-                    <input type="text" id="actor" value="${movie.actor}">
-                </div>
-                <div class="form-group-movie-manager">
-                    <label for="release-date">Release Date:</label>
-                    <input type="date" id="release-date" value="${new Date(movie.release_date).toISOString().split('T')[0]}">
-                </div>
-                <div class="form-group-movie-manager">
-                    <label for="country">Country:</label>
-                    <input type="text" id="country" value="${movie.country_name_en}">
-                </div>
-                <div class="form-group-movie-manager">
-                    <label for="genre">Genre:</label>
-                    <input type="text" id="genre" value="${movie.type_name_en.join(', ')}">
-                </div>
-                <div class="form-group-movie-manager">
-                    <label for="trailer">Trailer:</label>
-                    <input type="text" id="trailer" value="${movie.trailer}">
-                </div>
-                <div class="form-group-movie-manager">
-                    <label for="ratings">Ratings:</label>
-                    <input type="text" id="ratings" value="${movie.ratings}">
-                </div>
-                <div class="form-group-movie-manager">
-                    <label for="time">Time (minutes):</label>
-                    <input type="number" id="time" value="${movie.time}">
-                </div>
-                <div class="form-group-movie-manager">
-                    <label for="brief-vn">Brief (VN):</label>
-                    <textarea id="brief-vn">${movie.brief_vn}</textarea>
-                </div>
-                <div class="form-group-movie-manager">
-                    <label for="brief-en">Brief (EN):</label>
-                    <textarea id="brief-en">${movie.brief_en}</textarea>
-                </div>
-                <div class="form-group-movie-manager">
-                    <label for="movie-image">Image:</label>
-                    <input type="file" name="movieImage" id="movie-image" accept="image/*">
-                    ${movie.image ? `<img src="${movie.image}" alt="Current Image" width="100" height="100">` : ''}
-                </div>
-                <div class="form-action-movie-manager">
-                    <button type="submit" class="btn btn-primary">Save</button>
-                    <button type="button" class="btn btn-secondary" id="cancel-edit">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-    `;
+            </div>
+            `;
 
             // Handle form submission
             document.getElementById("edit-movie-form").addEventListener("submit", async (event) => {
@@ -281,7 +286,7 @@
                         director: document.getElementById("director").value,
                         actor: document.getElementById("actor").value,
                         release_date: new Date(document.getElementById("release-date").value),
-                        country_name_en: document.getElementById("country").value,
+                        country_name_vn: document.getElementById("country").value,
                         genre: document.getElementById("genre").value.split(',').map(genre => genre.trim()),
                         trailer: document.getElementById("trailer").value,
                         ratings: document.getElementById("ratings").value,
@@ -296,7 +301,7 @@
                     formData.append("director", updatedMovie.director);
                     formData.append("actor", updatedMovie.actor);
                     formData.append("release_date", updatedMovie.release_date);
-                    formData.append("country_name_en", updatedMovie.country_name_en);
+                    formData.append("country_name_vn", updatedMovie.country_name_vn);
                     formData.append("genre", updatedMovie.genre);
                     formData.append("trailer", updatedMovie.trailer);
                     formData.append("ratings", updatedMovie.ratings);
@@ -304,9 +309,14 @@
                     formData.append("brief_vn", updatedMovie.brief_vn);
                     formData.append("brief_en", updatedMovie.brief_en);
 
-                    const fileInput = document.getElementById("movie-image");
-                    if (fileInput.files.length > 0) {
-                        formData.append("movieImage", fileInput.files[0]);
+                    const movieImageInput = document.getElementById("movie-image");
+                    if (movieImageInput.files.length > 0) {
+                        formData.append("movieImage", movieImageInput.files[0]);
+                    }
+
+                    const backgroundImageInput = document.getElementById("background-image");
+                    if (backgroundImageInput.files.length > 0) {
+                        formData.append("backgroundImage", backgroundImageInput.files[0]);
                     }
 
                     const response = await fetch(`/admin/movies/${movie.id}`, {
@@ -341,69 +351,74 @@
             const content = document.querySelector(".content");
             content.innerHTML = `
             <!-- Add Movie Form -->
-<div class="content">
-    <h1>Add New Movie</h1>
-    <div class="container-admin">
-        <form id="add-movie-form" class="form-container-movie-manager">
-            <div class="form-group-movie-manager">
-                <label for="name-vn">Name (VN):</label>
-                <input type="text" id="name-vn" required>
+            <div class="content">
+                <h1>Add New Movie</h1>
+                <div class="container-admin">
+                    <form id="add-movie-form" class="form-container-movie-manager">
+                        <div class="form-group-movie-manager">
+                            <label for="name-vn">Name (VN):</label>
+                            <input type="text" id="name-vn" required>
+                        </div>
+                        <div class="form-group-movie-manager">
+                            <label for="name-en">Name (EN):</label>
+                            <input type="text" id="name-en" required>
+                        </div>
+                        <div class="form-group-movie-manager">
+                            <label for="director">Director:</label>
+                            <input type="text" id="director" required>
+                        </div>
+                        <div class="form-group-movie-manager">
+                            <label for="actor">Actor:</label>
+                            <input type="text" id="actor" required>
+                        </div>
+                        <div class="form-group-movie-manager">
+                            <label for="release-date">Release Date:</label>
+                            <input type="date" id="release-date" required>
+                        </div>
+                        <div class="form-group-movie-manager">
+                            <label for="country">Country:</label>
+                            <input type="text" id="country" required>
+                        </div>
+                        <div class="form-group-movie-manager">
+                            <label for="genre">Genre:</label>
+                            <input type="text" id="genre" required>
+                        </div>
+                        <div class="form-group-movie-manager">
+                            <label for="trailer">Trailer:</label>
+                            <input type="text" id="trailer" required>
+                        </div>
+                        <div class="form-group-movie-manager">
+                            <label for="ratings">Ratings:</label>
+                            <input type="text" id="ratings" required>
+                        </div>
+                        <div class="form-group-movie-manager">
+                            <label for="time">Time (minutes):</label>
+                            <input type="number" id="time" required>
+                        </div>
+                        <div class="form-group-movie-manager">
+                            <label for="brief-vn">Brief (VN):</label>
+                            <textarea id="brief-vn" required></textarea>
+                        </div>
+                        <div class="form-group-movie-manager">
+                            <label for="brief-en">Brief (EN):</label>
+                            <textarea id="brief-en" required></textarea>
+                        </div>
+                        <!-- Other form fields -->
+                      <div class="form-group-movie-manager">
+                        <label for="movie-image">Image:</label>
+                        <input type="file" name="movieImage" id="movie-image" accept="image/*" required>
+                      </div>
+                      <div class="form-group-movie-manager">
+                        <label for="background-image">Background Image:</label>
+                        <input type="file" name="backgroundImage" id="background-image" accept="image/*" required>
+                      </div>
+                      <div class="form-action-movie-manager">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <button type="button" class="btn btn-secondary" id="cancel-add">Cancel</button>
+                      </div>
+                    </form>
+                </div>
             </div>
-            <div class="form-group-movie-manager">
-                <label for="name-en">Name (EN):</label>
-                <input type="text" id="name-en" required>
-            </div>
-            <div class="form-group-movie-manager">
-                <label for="director">Director:</label>
-                <input type="text" id="director" required>
-            </div>
-            <div class="form-group-movie-manager">
-                <label for="actor">Actor:</label>
-                <input type="text" id="actor" required>
-            </div>
-            <div class="form-group-movie-manager">
-                <label for="release-date">Release Date:</label>
-                <input type="date" id="release-date" required>
-            </div>
-            <div class="form-group-movie-manager">
-                <label for="country">Country:</label>
-                <input type="text" id="country" required>
-            </div>
-            <div class="form-group-movie-manager">
-                <label for="genre">Genre:</label>
-                <input type="text" id="genre" required>
-            </div>
-            <div class="form-group-movie-manager">
-                <label for="trailer">Trailer:</label>
-                <input type="text" id="trailer" required>
-            </div>
-            <div class="form-group-movie-manager">
-                <label for="ratings">Ratings:</label>
-                <input type="text" id="ratings" required>
-            </div>
-            <div class="form-group-movie-manager">
-                <label for="time">Time (minutes):</label>
-                <input type="number" id="time" required>
-            </div>
-            <div class="form-group-movie-manager">
-                <label for="brief-vn">Brief (VN):</label>
-                <textarea id="brief-vn" required></textarea>
-            </div>
-            <div class="form-group-movie-manager">
-                <label for="brief-en">Brief (EN):</label>
-                <textarea id="brief-en" required></textarea>
-            </div>
-            <div class="form-group-movie-manager">
-                <label for="movie-image">Image:</label>
-                <input type="file" name="movieImage" id="movie-image" accept="image/*" required>
-            </div>
-            <div class="form-action-movie-manager">
-                <button type="submit" class="btn btn-primary">Save</button>
-                <button type="button" class="btn btn-secondary" id="cancel-add">Cancel</button>
-            </div>
-        </form>
-    </div>
-</div>
             `;
 
             // Handle form submission for adding movie
@@ -416,7 +431,7 @@
                 formData.append("director", document.getElementById("director").value);
                 formData.append("actor", document.getElementById("actor").value);
                 formData.append("release_date", document.getElementById("release-date").value);
-                formData.append("country_name_en", document.getElementById("country").value);
+                formData.append("country_name_vn", document.getElementById("country").value);
                 formData.append("genre", document.getElementById("genre").value);
                 formData.append("trailer", document.getElementById("trailer").value);
                 formData.append("ratings", document.getElementById("ratings").value);
@@ -424,7 +439,7 @@
                 formData.append("brief_vn", document.getElementById("brief-vn").value);
                 formData.append("brief_en", document.getElementById("brief-en").value);
                 formData.append("movieImage", document.getElementById("movie-image").files[0]);
-
+                formData.append("backgroundImage", document.getElementById("background-image").files[0]);
                 try {
                     const response = await fetch('/admin/movies', {
                         method: 'POST',

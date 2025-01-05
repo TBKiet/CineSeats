@@ -194,7 +194,7 @@ const createMovie = async (req, res) => {
       director,
       actor,
       release_date,
-      country_name_en,
+      country_name_vn,
       genre,
       trailer,
       ratings,
@@ -211,8 +211,8 @@ const createMovie = async (req, res) => {
       director,
       actor,
       release_date,
-      country_name_en,
-      type_name_en: genre ? genre.split(",").map((g) => g.trim()) : [],
+      country_name_vn,
+      type_name_vn: genre ? genre.split(",").map((g) => g.trim()) : [],
       trailer,
       ratings,
       time,
@@ -220,16 +220,23 @@ const createMovie = async (req, res) => {
       brief_en,
     };
 
-    if (req.file) {
+    if (req.files && req.files.movieImage) {
       try {
-        const cloudinaryResponse = await cloudinary.uploader.upload(req.file.path, {
-          folder: "movie_poster",
-          allowed_formats: ["jpeg", "png", "jpg", "gif"],
-        });
-        movieData.image = cloudinaryResponse.secure_url;
-      } catch (uploadError) {
-        console.error("Error uploading image to Cloudinary:", uploadError);
-        return res.status(500).json({ message: "Error uploading image to Cloudinary." });
+        const result = await cloudinary.uploader.upload(req.files.movieImage[0].path);
+        movieData.image = result.secure_url;
+      } catch (error) {
+        console.error("Error uploading image to Cloudinary:", error);
+        return res.status(500).json({ message: "Error uploading image." });
+      }
+    }
+
+    if (req.files && req.files.backgroundImage) {
+      try {
+        const result = await cloudinary.uploader.upload(req.files.backgroundImage[0].path);
+        movieData.background_image_url = result.secure_url;
+      } catch (error) {
+        console.error("Error uploading background image to Cloudinary:", error);
+        return res.status(500).json({ message: "Error uploading background image." });
       }
     }
 
@@ -269,7 +276,7 @@ const updateMovie = async (req, res) => {
       director,
       actor,
       release_date,
-      country_name_en,
+      country_name_vn,
       genre,
       trailer,
       ratings,
@@ -278,20 +285,18 @@ const updateMovie = async (req, res) => {
       brief_en
     } = req.body;
 
-    // Validate if the ID is a valid string
     if (!id) {
       return res.status(400).json({ message: "Invalid movie ID." });
     }
 
-    // Prepare data to update (excluding image part)
     const movieData = {
       name_vn,
       name_en,
       director,
       actor,
       release_date,
-      country_name_en,
-      type_name_en: genre ? genre.split(",").map((g) => g.trim()) : [], // Handle genres as an array
+      country_name_vn,
+      type_name_vn: genre ? genre.split(",").map((g) => g.trim()) : [],
       trailer,
       ratings,
       time,
@@ -299,10 +304,9 @@ const updateMovie = async (req, res) => {
       brief_en
     };
 
-    // Check if there's a file (movieImage) being uploaded
-    if (req.file) {
+    if (req.files && req.files.movieImage) {
       try {
-        const result = await cloudinary.uploader.upload(req.file.path);
+        const result = await cloudinary.uploader.upload(req.files.movieImage[0].path);
         movieData.image = result.secure_url;
       } catch (error) {
         console.error("Error uploading image to Cloudinary:", error);
@@ -310,10 +314,17 @@ const updateMovie = async (req, res) => {
       }
     }
 
-    // Update the movie in the database
-    const updatedMovie = await Movie.findOneAndUpdate({ id: id }, movieData, {
-      new: true,
-    });
+    if (req.files && req.files.backgroundImage) {
+      try {
+        const result = await cloudinary.uploader.upload(req.files.backgroundImage[0].path);
+        movieData.background_image_url = result.secure_url;
+      } catch (error) {
+        console.error("Error uploading background image to Cloudinary:", error);
+        return res.status(500).json({ message: "Error uploading background image." });
+      }
+    }
+
+    const updatedMovie = await Movie.findOneAndUpdate({ id: id }, movieData, { new: true });
 
     if (!updatedMovie) {
       return res.status(404).json({ message: "Movie not found." });
