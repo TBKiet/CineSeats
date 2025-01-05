@@ -24,7 +24,7 @@ passport.use(new LocalStrategy(async (username, password, done) => {
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: (process.env.NODE_ENV === 'production' || process.env.HOSTNAME === 'cineseats-production.up.railway.app')
+    callbackURL: (process.env.NODE_ENV === 'production')
         ? 'https://cineseats-production.up.railway.app/auth/google/callback'
         : 'http://localhost:3000/auth/google/callback',
 }, async (token, tokenSecret, profile, done) => {
