@@ -31,11 +31,13 @@ passport.use(new GoogleStrategy({
     try {
         let user = await User.findOne({where: {email: profile.emails[0].value}});
         const randomPassword = crypto.randomBytes(16).toString('hex');
+        const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
         if (!user) {
             user = await User.create({
-                username: profile.emails[0].value,
+                username: profile.id,
                 email: profile.emails[0].value,
-                password: randomPassword,
+                password: hashedPassword,
                 name: profile.displayName,
                 avatar_url: profile.photos[0].value,
                 isActive: true
