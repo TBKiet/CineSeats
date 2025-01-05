@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGO_URI_USERDB=mongodb+srv://quockhanh41:9hNKsR08vJlurpnO@cluster0.qrnq7.mongodb.net/UserDB?retryWrites=true&w=majority&appName=Cluster0
+      - MONGO_URI_MOVIEDB=mongodb+srv://quockhanh41:9hNKsR08vJlurpnO@cluster0.qrnq7.mongodb.net/MovieDB?retryWrites=true&w=majority&appName=Cluster0
+      - CLOUDINARY_API_KEY=524542637587694
+      - CLOUDINARY_API_SECRET=9H6QO_3kgTkJV8TdXQj3fQ946Rc
+      - SESSION_SECRET=verysecretkey
+      - EMAIL_SERVICE=gmail
+      - EMAIL_USERNAME=cineseats@gmail.com
+      - EMAIL_PASSWORD=wgidjybtfbxsjqlh
+      - MYSQL_USER=avnadmin
+      - MYSQL_PASSWORD=AVNS_NqJQd1Csv9IE1tMBCt0
+      - MYSQL_HOST=cineseats-22clc05-cineseats.l.aivencloud.com
+      - MYSQL_PORT=14478
+      - MYSQL_DATABASE=CineSeatsDB
+      - REDIS_HOST=redis-11595.c289.us-west-1-2.ec2.redns.redis-cloud.com
+      - REDIS_PORT=11595
+      - REDIS_PASSWORD=dwcpmuMSvS2uOYHKQrLeCPo01ZsOxBNO
+      - vnp_TmnCode=7G6LKBF2
+      - vnp_HashSecret=BG834Y15IYMEF2KSCQOFO5BEASTPRJSD
+      - vnp_Url=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+      - vnp_Api=https://sandbox.vnpayment.vn/merchant_webapi/api/transaction
+      - vnp_ReturnUrl=http://localhost:8888/order/vnpay_return
+      - GOOGLE_CLIENT_ID=818839480566-5052eicamslfpun7kurnj464f6gv747d.apps.googleusercontent.com
+      - GOOGLE_CLIENT_SECRET=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
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - mongo
+      - mysql
+      - redis
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+
+  mysql:
+    image: mysql:latest
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: CineSeatsDB
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
