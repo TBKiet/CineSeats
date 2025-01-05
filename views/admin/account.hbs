@@ -8,10 +8,8 @@
                 <div class="container-admin">
                     <div class="filter-options d-flex justify-content-between">
                         <div>
-                            <input type="text" id="filter-username" placeholder="Search by username..." class="filter"
-                                style="width: 190px;">
-                            <input type="text" id="filter-email" placeholder="Search by email..." class="filter"
-                                style="width: 190px;">
+                            <input type="text" id="filter-username" placeholder="Search by username..." class="filter" style="width: 190px;">
+                            <input type="text" id="filter-email" placeholder="Search by email..." class="filter" style="width: 190px;">
                             <button id="search-button">Search</button>
                         </div>
 
@@ -24,7 +22,7 @@
                                 <option value="employee">Employee</option>
                             </select>
 
-                            <label for="sort">Sort by:</label>
+                            <label for="sort-by">Sort by:</label>
                             <select id="sort-by" class="filter" style="width: 150px;">
                                 <option value="none">None</option>
                                 <option value="username">Username</option>
@@ -49,35 +47,28 @@
                                     <th>Email</th>
                                     <th>Role</th>
                                     <th>Phone</th>
-                                    <th>Is Blocked</th>
+                                    <th>Is Active</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {{#each users}}
                                 <tr>
-                                    <td>{{this.name}}</td>
+                                    <td>{{this.username}}</td>
                                     <td>{{this.email}}</td>
                                     <td>{{this.role}}</td>
                                     <td>{{this.phone}}</td>
                                     <td>{{this.isActive}}</td>
                                     <td>
-                                        <button class="btn btn-danger btn-sm block-btn"
-                                            data-id="{{this._id}}">Block</button>
-                                        <button class="btn btn-success btn-sm unblock-btn"
-                                            data-id="{{this._id}}">Unblock</button>
-                                        <button class="btn btn-danger btn-sm delete-btn"
-                                            data-id="{{this._id}}">Delete</button>
+                                        <button class="btn btn-danger btn-sm block-btn" data-username="{{this.username}}">Block</button>
+                                        <button class="btn btn-success btn-sm unblock-btn" data-username="{{this.username}}">Unblock</button>
+                                        <button class="btn btn-danger btn-sm delete-btn" data-username="{{this.username}}">Delete</button>
                                     </td>
                                 </tr>
                                 {{/each}}
                             </tbody>
                         </table>
                     </div>
-
-                    {{!-- <div class="actions">
-                        <button id="select-all-btn">Select All</button>
-                    </div> --}}
                 </div>
             </div>
         </div>
@@ -112,9 +103,9 @@
                     <td>${user.phone}</td>
                     <td>${user.isActive}</td>
                     <td>
-                        <button class="block-btn btn btn-danger btn-sm" data-id="${user._id}">Block</button>
-                        <button class="unblock-btn btn btn-success btn-sm" data-id="${user._id}">Unblock</button>
-                        <button class="delete-btn btn btn-danger btn-sm" data-id="${user._id}">Delete</button>
+                        <button class="block-btn btn btn-danger btn-sm" data-username="${user.username}">Block</button>
+                        <button class="unblock-btn btn btn-success btn-sm" data-username="${user.username}">Unblock</button>
+                        <button class="delete-btn btn btn-danger btn-sm" data-username="${user.username}">Delete</button>
                     </td>
                 </tr>
             `;
@@ -130,13 +121,16 @@
             // Block a user
             document.querySelectorAll(".block-btn").forEach((button) => {
                 button.addEventListener("click", async () => {
-                    const userId = button.dataset.id;
-                    const response = await fetch(`/admin/users/${userId}/block`, { method: "PATCH" });
+                    const username = button.dataset.username;
+                    const response = await fetch(`/admin/users/${username}/block`, { method: "PATCH" });
+                    const result = await response.json();
                     if (response.ok) {
-                        alert("User has been blocked.");
-                        fetchUsers(); // Refresh the table
+                        alert("User blocked successfully");
+                        fetchUsers(); // Refresh the user list
+                    } else if (response.status === 400 && result.message === "You cannot block your own account") {
+                        alert("You cannot block your own account");
                     } else {
-                        alert("Error blocking user.");
+                        console.error("Error blocking user.");
                     }
                 });
             });
@@ -144,13 +138,13 @@
             // Unblock a user
             document.querySelectorAll(".unblock-btn").forEach((button) => {
                 button.addEventListener("click", async () => {
-                    const userId = button.dataset.id;
-                    const response = await fetch(`/admin/users/${userId}/unblock`, { method: "PATCH" });
+                    const username = button.dataset.username;
+                    const response = await fetch(`/admin/users/${username}/unblock`, { method: "PATCH" });
                     if (response.ok) {
-                        alert("User has been unblocked.");
-                        fetchUsers(); // Refresh the table
+                        alert("User unblocked successfully");
+                        fetchUsers(); // Refresh the user list
                     } else {
-                        alert("Error unblocking user.");
+                        console.error("Error unblocking user.");
                     }
                 });
             });
@@ -158,48 +152,36 @@
             // Delete a user
             document.querySelectorAll(".delete-btn").forEach((button) => {
                 button.addEventListener("click", async () => {
-                    const userId = button.dataset.id;
-                    const response = await fetch(`/admin/users/${userId}`, { method: "DELETE" });
+                    const username = button.dataset.username;
+                    const response = await fetch(`/admin/users/${username}`, { method: "DELETE" });
                     if (response.ok) {
-                        alert("User has been deleted.");
-                        fetchUsers(); // Refresh the table
+                        fetchUsers(); // Refresh the user list
                     } else {
-                        alert("Error deleting user.");
+                        console.error("Error deleting user.");
                     }
                 });
             });
         };
-
-        // Search button logic
-        document.getElementById("search-button").addEventListener("click", () => {
+        // Filter button logic
+        document.getElementById("filter-button").addEventListener("click", () => {
             const username = document.getElementById("filter-username").value.trim();
             const email = document.getElementById("filter-email").value.trim();
+            const role = document.getElementById("role").value;
+            const sortBy = document.getElementById("sort-by").value;
+            const sortOrder = document.getElementById("sort-order").value;
 
-            // Only send `username` and `email` for search
+            // Only send filters that are applied
             const filters = {};
             if (username) filters.username = username;
             if (email) filters.email = email;
-
-            fetchUsers(filters);
-        });
-
-        // Filter button logic
-        document.getElementById("filter-button").addEventListener("click", () => {
-            const sortBy = document.getElementById("sort-by").value;
-            const sortOrder = document.getElementById("sort-order").value;
-            const role = document.getElementById("role").value;
-
-            // Only send sorting and role for filters
-            const filters = {};
+            if (role && role !== "all") filters.role = role;
             if (sortBy && sortBy !== "none") filters.sortBy = sortBy;
             if (sortOrder) filters.sortOrder = sortOrder;
-            if (role && role !== "all") filters.role = role;
 
             fetchUsers(filters);
         });
 
-        // Initial load (fetch all users)
+        // Initial fetch of users
         fetchUsers();
     });
-
 </script>

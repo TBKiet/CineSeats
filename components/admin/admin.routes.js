@@ -9,9 +9,9 @@ router.get("/account", renderAccount);
 router.get("/movie", renderMovie);
 
 // API support account management
-router.delete('/users/:id', deleteUser);
-router.patch('/users/:id/block', blockUser);
-router.patch('/users/:id/unblock', unblockUser);
+router.delete('/users/:username', deleteUser);
+router.patch('/users/:username/block', blockUser);
+router.patch('/users/:username/unblock', unblockUser);
 router.get('/users', getFilteredAndSortedUsers);
 
 // API support movie management

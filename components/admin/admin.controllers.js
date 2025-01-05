@@ -2,6 +2,7 @@ const { getTotalUsers } = require("../account/account.model");
 const { User } = require("../../api/booking/booking_model");
 const Movie = require("../movies/movies.model");
 const { cloudinary } = require("../cloudinary/config/cloud"); // Import config của Cloudinary
+const { Op } = require("sequelize");
 
 // Render Pages
 // Render trang quản lý tài khoản
@@ -68,35 +69,55 @@ const renderMovie = async (req, res) => {
 };
 
 // Users management
-// Block user
+// Block user based on username
 const blockUser = async (req, res) => {
   try {
-    const userId = req.params.id;
-    await User.findByIdAndUpdate(userId, { isActive: false });
+    const username = req.params.username;
+    if (username === req.user.username) {
+      return res.status(400).json({ message: "You cannot block your own account" });
+    }
+    const user = await User.findOne({ where: { username } });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    user.isActive = false;
+    await user.save();
     res.status(200).json({ message: "User blocked successfully" });
   } catch (error) {
+    console.error("Error blocking user:", error);
     res.status(500).json({ message: "Error blocking user" });
   }
 };
 
-// Unblock user
+// Unblock user based on username
 const unblockUser = async (req, res) => {
   try {
-    const userId = req.params.id;
-    await User.findByIdAndUpdate(userId, { isActive: true });
+    const username = req.params.username;
+    const user = await User.findOne({ where: { username } });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    user.isActive = true;
+    await user.save();
     res.status(200).json({ message: "User unblocked successfully" });
   } catch (error) {
+    console.error("Error unblocking user:", error);
     res.status(500).json({ message: "Error unblocking user" });
   }
 };
 
-// Delete user
+// Delete user based on username
 const deleteUser = async (req, res) => {
   try {
-    const userId = req.params.id;
-    await User.findByIdAndDelete(userId);
+    const username = req.params.username;
+    const user = await User.findOne({ where: { username } });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    await user.destroy();
     res.status(200).json({ message: "User deleted successfully" });
   } catch (error) {
+    console.error("Error deleting user:", error);
     res.status(500).json({ message: "Error deleting user" });
   }
 };
@@ -108,8 +129,8 @@ const getFilteredAndSortedUsers = async (req, res) => {
 
     // Build query filters
     const filter = {};
-    if (username) filter.username = { [Op.iLike]: `%${username}%` }; // Case-insensitive search
-    if (email) filter.email = { [Op.iLike]: `%${email}%` };
+    if (username) filter.username = { [Op.like]: `%${username}%` }; // Case-insensitive search
+    if (email) filter.email = { [Op.like]: `%${email}%` };
     if (role && role !== "all") filter.role = role;
 
     // Build sorting options
