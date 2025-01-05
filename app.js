@@ -3,7 +3,7 @@ const express = require("express");
 const session = require("express-session");
 const mongoose = require("mongoose");
 const passport = require("passport");
-const { engine } = require("express-handlebars");
+const {engine} = require("express-handlebars");
 const path = require("path");
 const MongoStore = require("connect-mongo");
 
@@ -31,7 +31,7 @@ const PORT = 3000;
 app.use(express.static(path.join(__dirname, "public")));
 // Handle register and login form data
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({extended: true}));
 
 app.use('/api/movies', apiMoviesRouter);
 app.use('/api/showtime', apiShowtimeRouter);
@@ -94,7 +94,7 @@ app.set("view engine", "hbs");
 app.use((req, res, next) => {
     res.locals.isAuthenticated = req.isAuthenticated();
     res.locals.username = req.user ? req.user.username : null;
-    res.locals.user = req.user ? req.user.toObject ? req.user.toObject() : { ...req.user } : null; // Convert user to plain object
+    res.locals.user = req.user ? req.user.toObject ? req.user.toObject() : {...req.user} : null; // Convert user to plain object
     next();
 });
 
@@ -107,15 +107,23 @@ app.use("/booking", bookingRouter);
 app.use("/payment", paymentRouter);
 
 app.get("/about", (req, res) => {
-    res.render("about", { layout: "main" });
+    res.render("about", {layout: "main"});
 });
 
 app.get("/contact", (req, res) => {
-    res.render("contact", { layout: "main" });
+    res.render("contact", {layout: "main"});
 });
 
-app.use('/admin', adminRouter);
 app.use('/account', accountRouter);
+const ensureAdmin = (req, res, next) => {
+    if (req.isAuthenticated() && req.user.role === 'admin') {
+        return next();
+    }
+    res.status(403).send("Access denied. Admins only.");
+};
+// Use the middleware for the /admin route
+app.use('/admin', ensureAdmin, adminRouter);
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
