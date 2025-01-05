@@ -125,7 +125,7 @@ const deleteUser = async (req, res) => {
 // Lấy danh sách người dùng đã lọc và sắp xếp
 const getFilteredAndSortedUsers = async (req, res) => {
   try {
-    const { username, email, sortBy, sortOrder, role } = req.query;
+    const { username, email, sortBy, sortOrder, role, page = 1, limit = 1 } = req.query;
 
     // Build query filters
     const filter = {};
@@ -139,9 +139,18 @@ const getFilteredAndSortedUsers = async (req, res) => {
       sort.push([sortBy, sortOrder === "desc" ? "DESC" : "ASC"]);
     }
 
-    // Fetch users from the database
-    const users = await User.findAll({ where: filter, order: sort });
-    res.status(200).json({ users });
+    // Calculate offset for pagination
+    const offset = (page - 1) * limit;
+
+    // Fetch users from the database with pagination
+    const { rows: users, count: totalUsers } = await User.findAndCountAll({
+      where: filter,
+      order: sort,
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+    });
+
+    res.status(200).json({ users, totalUsers, totalPages: Math.ceil(totalUsers / limit), currentPage: parseInt(page) });
   } catch (error) {
     console.error("Error fetching users:", error);
     res.status(500).json({ message: "Internal server error" });

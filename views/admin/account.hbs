@@ -42,17 +42,17 @@
                     <div style="overflow-y: auto; max-height: 500px;">
                         <table id="user-db" class="table table-striped">
                             <thead>
-                                <tr>
-                                    <th>Username</th>
-                                    <th>Email</th>
-                                    <th>Role</th>
-                                    <th>Phone</th>
-                                    <th>Is Active</th>
-                                    <th>Actions</th>
-                                </tr>
+                            <tr>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Phone</th>
+                                <th>Is Active</th>
+                                <th>Actions</th>
+                            </tr>
                             </thead>
                             <tbody>
-                                {{#each users}}
+                            {{#each users}}
                                 <tr>
                                     <td>{{this.username}}</td>
                                     <td>{{this.email}}</td>
@@ -65,10 +65,12 @@
                                         <button class="btn btn-danger btn-sm delete-btn" data-username="{{this.username}}">Delete</button>
                                     </td>
                                 </tr>
-                                {{/each}}
+                            {{/each}}
                             </tbody>
                         </table>
                     </div>
+                    <!-- Pagination controls -->
+                    <div id="pagination-controls" class="d-flex justify-content-center mt-3"></div>
                 </div>
             </div>
         </div>
@@ -77,13 +79,15 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", () => {
-        // Fetch users with optional filters
-        const fetchUsers = async (filters = {}) => {
+        // Fetch users with optional filters and pagination
+        const fetchUsers = async (filters = {}, page = 1) => {
+            filters.page = page;
             const params = new URLSearchParams(filters);
             const response = await fetch(`/admin/users?${params.toString()}`);
             if (response.ok) {
-                const { users } = await response.json();
+                const { users, totalPages, currentPage } = await response.json();
                 populateUserTable(users);
+                updatePaginationControls(totalPages, currentPage);
             } else {
                 console.error("Error fetching users.");
             }
@@ -96,25 +100,74 @@
 
             users.forEach((user) => {
                 const row = `
-                <tr>
-                    <td>${user.username}</td>
-                    <td>${user.email}</td>
-                    <td>${user.role}</td>
-                    <td>${user.phone}</td>
-                    <td>${user.isActive}</td>
-                    <td>
-                        <button class="block-btn btn btn-danger btn-sm" data-username="${user.username}">Block</button>
-                        <button class="unblock-btn btn btn-success btn-sm" data-username="${user.username}">Unblock</button>
-                        <button class="delete-btn btn btn-danger btn-sm" data-username="${user.username}">Delete</button>
-                    </td>
-                </tr>
-            `;
+          <tr>
+            <td>${user.username}</td>
+            <td>${user.email}</td>
+            <td>${user.role}</td>
+            <td>${user.phone}</td>
+            <td>${user.isActive}</td>
+            <td>
+              <button class="block-btn btn btn-danger btn-sm" data-username="${user.username}">Block</button>
+              <button class="unblock-btn btn btn-success btn-sm" data-username="${user.username}">Unblock</button>
+              <button class="delete-btn btn btn-danger btn-sm" data-username="${user.username}">Delete</button>
+            </td>
+          </tr>
+        `;
                 tbody.insertAdjacentHTML("beforeend", row);
             });
 
             // Reassign event listeners after updating the table
             assignActionListeners();
         };
+
+        // Update pagination controls
+        const updatePaginationControls = (totalPages, currentPage) => {
+            const paginationContainer = document.getElementById("pagination-controls");
+            paginationContainer.innerHTML = ""; // Clear existing controls
+
+            for (let i = 1; i <= totalPages; i++) {
+                const pageButton = document.createElement("button");
+                pageButton.textContent = i;
+                pageButton.classList.add("page-btn");
+                if (i === currentPage) {
+                    pageButton.classList.add("active");
+                }
+                pageButton.addEventListener("click", () => fetchUsers(getCurrentFilters(), i));
+                paginationContainer.appendChild(pageButton);
+            }
+        };
+
+        // Get current filters
+        const getCurrentFilters = () => {
+            const username = document.getElementById("filter-username").value.trim();
+            const email = document.getElementById("filter-email").value.trim();
+            const role = document.getElementById("role").value;
+            const sortBy = document.getElementById("sort-by").value;
+            const sortOrder = document.getElementById("sort-order").value;
+
+            // Only send filters that are applied
+            const filters = {};
+            if (username) filters.username = username;
+            if (email) filters.email = email;
+            if (role && role !== "all") filters.role = role;
+            if (sortBy && sortBy !== "none") filters.sortBy = sortBy;
+            if (sortOrder) filters.sortOrder = sortOrder;
+
+            return filters;
+        };
+
+        // Filter button logic
+        document.getElementById("filter-button").addEventListener("click", () => {
+            fetchUsers(getCurrentFilters());
+        });
+
+        // Search button logic
+        document.getElementById("search-button").addEventListener("click", () => {
+            fetchUsers(getCurrentFilters());
+        });
+
+        // Initial fetch of users
+        fetchUsers();
 
         // Assign event listeners for block, unblock, and delete buttons
         const assignActionListeners = () => {
@@ -126,7 +179,7 @@
                     const result = await response.json();
                     if (response.ok) {
                         alert("User blocked successfully");
-                        fetchUsers(); // Refresh the user list
+                        fetchUsers(getCurrentFilters()); // Refresh the user list
                     } else if (response.status === 400 && result.message === "You cannot block your own account") {
                         alert("You cannot block your own account");
                     } else {
@@ -142,7 +195,7 @@
                     const response = await fetch(`/admin/users/${username}/unblock`, { method: "PATCH" });
                     if (response.ok) {
                         alert("User unblocked successfully");
-                        fetchUsers(); // Refresh the user list
+                        fetchUsers(getCurrentFilters()); // Refresh the user list
                     } else {
                         console.error("Error unblocking user.");
                     }
@@ -155,46 +208,12 @@
                     const username = button.dataset.username;
                     const response = await fetch(`/admin/users/${username}`, { method: "DELETE" });
                     if (response.ok) {
-                        fetchUsers(); // Refresh the user list
+                        fetchUsers(getCurrentFilters()); // Refresh the user list
                     } else {
                         console.error("Error deleting user.");
                     }
                 });
             });
         };
-        // Filter button logic
-        document.getElementById("filter-button").addEventListener("click", () => {
-            const username = document.getElementById("filter-username").value.trim();
-            const email = document.getElementById("filter-email").value.trim();
-            const role = document.getElementById("role").value;
-            const sortBy = document.getElementById("sort-by").value;
-            const sortOrder = document.getElementById("sort-order").value;
-
-            // Only send filters that are applied
-            const filters = {};
-            if (username) filters.username = username;
-            if (email) filters.email = email;
-            if (role && role !== "all") filters.role = role;
-            if (sortBy && sortBy !== "none") filters.sortBy = sortBy;
-            if (sortOrder) filters.sortOrder = sortOrder;
-
-            fetchUsers(filters);
-        });
-
-        // Search button logic
-        document.getElementById("search-button").addEventListener("click", () => {
-            const username = document.getElementById("filter-username").value.trim();
-            const email = document.getElementById("filter-email").value.trim();
-
-            // Only send filters that are applied
-            const filters = {};
-            if (username) filters.username = username;
-            if (email) filters.email = email;
-
-            fetchUsers(filters);
-        });
-
-        // Initial fetch of users
-        fetchUsers();
     });
 </script>
