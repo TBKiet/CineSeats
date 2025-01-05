@@ -181,6 +181,19 @@
             fetchUsers(filters);
         });
 
+        // Search button logic
+        document.getElementById("search-button").addEventListener("click", () => {
+            const username = document.getElementById("filter-username").value.trim();
+            const email = document.getElementById("filter-email").value.trim();
+
+            // Only send filters that are applied
+            const filters = {};
+            if (username) filters.username = username;
+            if (email) filters.email = email;
+
+            fetchUsers(filters);
+        });
+
         // Initial fetch of users
         fetchUsers();
     });
