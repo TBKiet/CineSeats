@@ -3,6 +3,7 @@ const { User } = require("../../api/booking/booking_model");
 const Movie = require("../movies/movies.model");
 const { cloudinary } = require("../cloudinary/config/cloud"); // Import config của Cloudinary
 const { Op } = require("sequelize");
+const mongoose = require("mongoose");
 
 // Render Pages
 // Render trang quản lý tài khoản
@@ -125,7 +126,7 @@ const deleteUser = async (req, res) => {
 // Lấy danh sách người dùng đã lọc và sắp xếp
 const getFilteredAndSortedUsers = async (req, res) => {
   try {
-    const { username, email, sortBy, sortOrder, role, page = 1, limit = 1 } = req.query;
+    const { username, email, sortBy, sortOrder, role, page = 1, limit = 10 } = req.query;
 
     // Build query filters
     const filter = {};
@@ -195,51 +196,46 @@ const createMovie = async (req, res) => {
       release_date,
       country_name_en,
       genre,
+      trailer,
+      ratings,
+      time,
+      brief_vn,
+      brief_en,
     } = req.body;
 
-    // Prepare data for the new movie
     const movieData = {
-      _id: new mongoose.Types.ObjectId(), // Generate a new ObjectId
-      id: new mongoose.Types.ObjectId().toHexString(), // Generate a new UUID
+      _id: new mongoose.Types.ObjectId(),
+      id: new mongoose.Types.ObjectId().toHexString(),
       name_vn,
       name_en,
       director,
       actor,
       release_date,
       country_name_en,
-      type_name_en: genre ? genre.split(",").map((g) => g.trim()) : [], // Handle genres as an array
+      type_name_en: genre ? genre.split(",").map((g) => g.trim()) : [],
+      trailer,
+      ratings,
+      time,
+      brief_vn,
+      brief_en,
     };
 
-    // Check if there's a file (movieImage) being uploaded
     if (req.file) {
       try {
-        // Upload the image to Cloudinary
-        const cloudinaryResponse = await cloudinary.uploader.upload(
-          req.file.path,
-          {
-            folder: "movie_poster", // Specify the folder name on Cloudinary
-            allowed_formats: ["jpeg", "png", "jpg", "gif"],
-          }
-        );
-
-        // Add the Cloudinary image URL to the movieData
+        const cloudinaryResponse = await cloudinary.uploader.upload(req.file.path, {
+          folder: "movie_poster",
+          allowed_formats: ["jpeg", "png", "jpg", "gif"],
+        });
         movieData.image = cloudinaryResponse.secure_url;
       } catch (uploadError) {
         console.error("Error uploading image to Cloudinary:", uploadError);
-        return res
-          .status(500)
-          .json({ message: "Error uploading image to Cloudinary." });
+        return res.status(500).json({ message: "Error uploading image to Cloudinary." });
       }
     }
 
-    // Create a new movie with the prepared data
     const newMovie = new Movie(movieData);
-
-    // Save the new movie to the database
     await newMovie.save();
-    res
-      .status(201)
-      .json({ message: "Movie added successfully!", movie: newMovie });
+    res.status(201).json({ message: "Movie added successfully!", movie: newMovie });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error adding movie." });
@@ -275,6 +271,11 @@ const updateMovie = async (req, res) => {
       release_date,
       country_name_en,
       genre,
+      trailer,
+      ratings,
+      time,
+      brief_vn,
+      brief_en
     } = req.body;
 
     // Validate if the ID is a valid string
@@ -291,27 +292,21 @@ const updateMovie = async (req, res) => {
       release_date,
       country_name_en,
       type_name_en: genre ? genre.split(",").map((g) => g.trim()) : [], // Handle genres as an array
+      trailer,
+      ratings,
+      time,
+      brief_vn,
+      brief_en
     };
 
     // Check if there's a file (movieImage) being uploaded
     if (req.file) {
       try {
-        // Upload the image to Cloudinary
-        const cloudinaryResponse = await cloudinary.uploader.upload(
-          req.file.path,
-          {
-            folder: "movie_poster", // Specify the folder name on Cloudinary
-            allowed_formats: ["jpeg", "png", "jpg", "gif"],
-          }
-        );
-
-        // Add the Cloudinary image URL to the movieData
-        movieData.image = cloudinaryResponse.secure_url;
-      } catch (uploadError) {
-        console.error("Error uploading image to Cloudinary:", uploadError);
-        return res
-          .status(500)
-          .json({ message: "Error uploading image to Cloudinary." });
+        const result = await cloudinary.uploader.upload(req.file.path);
+        movieData.image = result.secure_url;
+      } catch (error) {
+        console.error("Error uploading image to Cloudinary:", error);
+        return res.status(500).json({ message: "Error uploading image." });
       }
     }
 
@@ -324,11 +319,9 @@ const updateMovie = async (req, res) => {
       return res.status(404).json({ message: "Movie not found." });
     }
 
-    res
-      .status(200)
-      .json({ message: "Movie updated successfully!", movie: updatedMovie });
+    res.status(200).json({ message: "Movie updated successfully!", movie: updatedMovie });
   } catch (error) {
-    console.error(error);
+    console.error("Error updating movie:", error);
     res.status(500).json({ message: "Error updating movie." });
   }
 };
