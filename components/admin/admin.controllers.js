@@ -1,25 +1,25 @@
-const { User, getTotalUsers } = require("../account/account.model");
+const { getTotalUsers } = require("../account/account.model");
+const { User } = require("../../api/booking/booking_model");
 const Movie = require("../movies/movies.model");
-const mongoose = require("mongoose");
-const { cloudinary } = require('../cloudinary/config/cloud'); // Import config của Cloudinary
+const { cloudinary } = require("../cloudinary/config/cloud"); // Import config của Cloudinary
 
 // Render Pages
 // Render trang quản lý tài khoản
 const renderAccount = async (req, res) => {
-  if (req.user.role !== 'admin') {
+  if (req.user.role !== "admin") {
     return res.status(403).send("Access denied.");
   }
   try {
-    const users = await User.find(); // Lấy tất cả người dùng
-    const filteredUsers = users.map(user => ({
-      _id: user.id,
+    const users = await User.findAll(); // Fetch all users using Sequelize
+    const filteredUsers = users.map((user) => ({
+      id: user.id,
       name: user.username,
       email: user.email,
       role: user.role,
       phone: user.phone,
-      status: user.status
+      status: user.status,
     }));
-    res.render("admin/account", { users: filteredUsers }); // Trả về trang quản lý tài khoản với danh sách người dùng
+    res.render("admin/account", { users: filteredUsers }); // Render account management page with user list
   } catch (error) {
     console.error("Error loading account management page:", error);
     res.status(500).send("Error loading account management page.");
@@ -28,7 +28,7 @@ const renderAccount = async (req, res) => {
 
 // Render trang dashboard
 const renderDashBoard = async (req, res) => {
-  if (req.user.role !== 'admin') {
+  if (req.user.role !== "admin") {
     return res.status(403).send("Access denied.");
   }
   try {
@@ -41,20 +41,23 @@ const renderDashBoard = async (req, res) => {
 
 // Render trang movie
 const renderMovie = async (req, res) => {
-  if (req.user.role !== 'admin') {
+  if (req.user.role !== "admin") {
     return res.status(403).send("Access denied.");
   }
   try {
     // Lấy tất cả phim
     const movies = await Movie.find();
-    const movieData = movies.map(movie => ({
+    const movieData = movies.map((movie) => ({
       id: movie.id,
       name: movie.name_vn,
       genre: movie.type_name_en.join(", "), // Join genres with a comma
       country: movie.country_name_en,
       price: movie.price || "N/A", // Default to "N/A" if price is not available
       totalPurchases: movie.totalPurchases || 0, // Default to 0 if totalPurchase is not available
-      releasedTime: movie.release_date instanceof Date ? movie.release_date.toLocaleDateString() : "Unknown", // Release date
+      releasedTime:
+        movie.release_date instanceof Date
+          ? movie.release_date.toLocaleDateString()
+          : "Unknown", // Release date
     }));
 
     res.render("admin/movie", { movies: movieData });
@@ -64,16 +67,15 @@ const renderMovie = async (req, res) => {
   }
 };
 
-
 // Users management
 // Block user
 const blockUser = async (req, res) => {
   try {
     const userId = req.params.id;
     await User.findByIdAndUpdate(userId, { isActive: false });
-    res.status(200).json({ message: 'User blocked successfully' });
+    res.status(200).json({ message: "User blocked successfully" });
   } catch (error) {
-    res.status(500).json({ message: 'Error blocking user' });
+    res.status(500).json({ message: "Error blocking user" });
   }
 };
 
@@ -82,9 +84,9 @@ const unblockUser = async (req, res) => {
   try {
     const userId = req.params.id;
     await User.findByIdAndUpdate(userId, { isActive: true });
-    res.status(200).json({ message: 'User unblocked successfully' });
+    res.status(200).json({ message: "User unblocked successfully" });
   } catch (error) {
-    res.status(500).json({ message: 'Error unblocking user' });
+    res.status(500).json({ message: "Error unblocking user" });
   }
 };
 
@@ -93,9 +95,9 @@ const deleteUser = async (req, res) => {
   try {
     const userId = req.params.id;
     await User.findByIdAndDelete(userId);
-    res.status(200).json({ message: 'User deleted successfully' });
+    res.status(200).json({ message: "User deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting user' });
+    res.status(500).json({ message: "Error deleting user" });
   }
 };
 
@@ -106,26 +108,24 @@ const getFilteredAndSortedUsers = async (req, res) => {
 
     // Build query filters
     const filter = {};
-    if (username) filter.username = new RegExp(username, 'i'); // Search username
-    if (email) filter.email = new RegExp(email, 'i');
+    if (username) filter.username = { [Op.iLike]: `%${username}%` }; // Case-insensitive search
+    if (email) filter.email = { [Op.iLike]: `%${email}%` };
     if (role && role !== "all") filter.role = role;
 
     // Build sorting options
-    const sort = {};
+    const sort = [];
     if (sortBy) {
-      sort[sortBy] = sortOrder === "desc" ? -1 : 1;
+      sort.push([sortBy, sortOrder === "desc" ? "DESC" : "ASC"]);
     }
 
     // Fetch users from the database
-    const users = await User.find(filter).sort(sort);
-
+    const users = await User.findAll({ where: filter, order: sort });
     res.status(200).json({ users });
   } catch (error) {
     console.error("Error fetching users:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 // Movies Management
 // Helper function to get filtered and sorted movies
@@ -134,7 +134,7 @@ const getFilteredAndSortedMovies = async (req, res) => {
     const { name, genre, country, sortBy, sortOrder } = req.query;
     // Build filter query
     const filter = {};
-    if (name) filter.name_vn = new RegExp(name, 'i'); // Case-insensitive search
+    if (name) filter.name_vn = new RegExp(name, "i"); // Case-insensitive search
     if (genre && genre !== "all") filter.type_name_en = genre;
     if (country && country !== "all") filter.country_name_en = country;
 
@@ -157,7 +157,15 @@ const getFilteredAndSortedMovies = async (req, res) => {
 // Create a new movie
 const createMovie = async (req, res) => {
   try {
-    const { name_vn, name_en, director, actor, release_date, country_name_en, genre } = req.body;
+    const {
+      name_vn,
+      name_en,
+      director,
+      actor,
+      release_date,
+      country_name_en,
+      genre,
+    } = req.body;
 
     // Prepare data for the new movie
     const movieData = {
@@ -169,23 +177,28 @@ const createMovie = async (req, res) => {
       actor,
       release_date,
       country_name_en,
-      type_name_en: genre ? genre.split(',').map(g => g.trim()) : [], // Handle genres as an array
+      type_name_en: genre ? genre.split(",").map((g) => g.trim()) : [], // Handle genres as an array
     };
 
     // Check if there's a file (movieImage) being uploaded
     if (req.file) {
       try {
         // Upload the image to Cloudinary
-        const cloudinaryResponse = await cloudinary.uploader.upload(req.file.path, {
-          folder: 'movie_poster', // Specify the folder name on Cloudinary
-          allowed_formats: ['jpeg', 'png', 'jpg', 'gif'],
-        });
+        const cloudinaryResponse = await cloudinary.uploader.upload(
+          req.file.path,
+          {
+            folder: "movie_poster", // Specify the folder name on Cloudinary
+            allowed_formats: ["jpeg", "png", "jpg", "gif"],
+          }
+        );
 
         // Add the Cloudinary image URL to the movieData
         movieData.image = cloudinaryResponse.secure_url;
       } catch (uploadError) {
-        console.error('Error uploading image to Cloudinary:', uploadError);
-        return res.status(500).json({ message: 'Error uploading image to Cloudinary.' });
+        console.error("Error uploading image to Cloudinary:", uploadError);
+        return res
+          .status(500)
+          .json({ message: "Error uploading image to Cloudinary." });
       }
     }
 
@@ -194,10 +207,12 @@ const createMovie = async (req, res) => {
 
     // Save the new movie to the database
     await newMovie.save();
-    res.status(201).json({ message: 'Movie added successfully!', movie: newMovie });
+    res
+      .status(201)
+      .json({ message: "Movie added successfully!", movie: newMovie });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Error adding movie.' });
+    res.status(500).json({ message: "Error adding movie." });
   }
 };
 
@@ -222,11 +237,19 @@ const getMovieById = async (req, res) => {
 const updateMovie = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name_vn, name_en, director, actor, release_date, country_name_en, genre } = req.body;
+    const {
+      name_vn,
+      name_en,
+      director,
+      actor,
+      release_date,
+      country_name_en,
+      genre,
+    } = req.body;
 
     // Validate if the ID is a valid string
     if (!id) {
-      return res.status(400).json({ message: 'Invalid movie ID.' });
+      return res.status(400).json({ message: "Invalid movie ID." });
     }
 
     // Prepare data to update (excluding image part)
@@ -237,37 +260,46 @@ const updateMovie = async (req, res) => {
       actor,
       release_date,
       country_name_en,
-      type_name_en: genre ? genre.split(',').map(g => g.trim()) : [], // Handle genres as an array
+      type_name_en: genre ? genre.split(",").map((g) => g.trim()) : [], // Handle genres as an array
     };
 
     // Check if there's a file (movieImage) being uploaded
     if (req.file) {
       try {
         // Upload the image to Cloudinary
-        const cloudinaryResponse = await cloudinary.uploader.upload(req.file.path, {
-          folder: 'movie_poster', // Specify the folder name on Cloudinary
-          allowed_formats: ['jpeg', 'png', 'jpg', 'gif'],
-        });
+        const cloudinaryResponse = await cloudinary.uploader.upload(
+          req.file.path,
+          {
+            folder: "movie_poster", // Specify the folder name on Cloudinary
+            allowed_formats: ["jpeg", "png", "jpg", "gif"],
+          }
+        );
 
         // Add the Cloudinary image URL to the movieData
         movieData.image = cloudinaryResponse.secure_url;
       } catch (uploadError) {
-        console.error('Error uploading image to Cloudinary:', uploadError);
-        return res.status(500).json({ message: 'Error uploading image to Cloudinary.' });
+        console.error("Error uploading image to Cloudinary:", uploadError);
+        return res
+          .status(500)
+          .json({ message: "Error uploading image to Cloudinary." });
       }
     }
 
     // Update the movie in the database
-    const updatedMovie = await Movie.findOneAndUpdate({ id: id }, movieData, { new: true });
+    const updatedMovie = await Movie.findOneAndUpdate({ id: id }, movieData, {
+      new: true,
+    });
 
     if (!updatedMovie) {
-      return res.status(404).json({ message: 'Movie not found.' });
+      return res.status(404).json({ message: "Movie not found." });
     }
 
-    res.status(200).json({ message: 'Movie updated successfully!', movie: updatedMovie });
+    res
+      .status(200)
+      .json({ message: "Movie updated successfully!", movie: updatedMovie });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Error updating movie.' });
+    res.status(500).json({ message: "Error updating movie." });
   }
 };
 
@@ -276,11 +308,12 @@ const deleteMovie = async (req, res) => {
   try {
     const { id } = req.params;
     const deletedMovie = await Movie.findOneAndDelete({ id: id }); // Sử dụng id thay vì _id
-    if (!deletedMovie) return res.status(404).json({ error: 'Movie not found.' });
-    res.status(200).json({ message: 'Movie deleted successfully.' });
+    if (!deletedMovie)
+      return res.status(404).json({ error: "Movie not found." });
+    res.status(200).json({ message: "Movie deleted successfully." });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Error deleting movie.' });
+    res.status(500).json({ error: "Error deleting movie." });
   }
 };
 
@@ -327,5 +360,5 @@ module.exports = {
   updateMovie,
   deleteMovie,
   getFilteredAndSortedMovies,
-  getTotalMoviesCount
+  getTotalMoviesCount,
 };
