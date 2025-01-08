@@ -24,7 +24,7 @@ table th {
   background-color: lightgray;
 }
 
-button {
+#search-button {
   padding: 5px 10px;
   margin-right: 10px;
   cursor: pointer;
@@ -35,7 +35,37 @@ button {
   border-radius: 5px;
 }
 
-button:hover {
+#search-button:hover {
+  background-color: #45a049;
+}
+
+#filter-button {
+  padding: 5px 10px;
+  margin-right: 10px;
+  cursor: pointer;
+  border: none;
+  background-color: #4caf50;
+  color: white;
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+#filter-button:hover {
+  background-color: #45a049;
+}
+
+#sort-button {
+  padding: 5px 10px;
+  margin-right: 10px;
+  cursor: pointer;
+  border: none;
+  background-color: #4caf50;
+  color: white;
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+#sort-button:hover {
   background-color: #45a049;
 }
 
