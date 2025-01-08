@@ -190,7 +190,6 @@ const createMovie = async (req, res) => {
   try {
     const {
       name_vn,
-      name_en,
       director,
       actor,
       release_date,
@@ -200,14 +199,12 @@ const createMovie = async (req, res) => {
       ratings,
       time,
       brief_vn,
-      brief_en,
     } = req.body;
 
     const movieData = {
       _id: new mongoose.Types.ObjectId(),
       id: new mongoose.Types.ObjectId().toHexString(),
       name_vn,
-      name_en,
       director,
       actor,
       release_date,
@@ -217,7 +214,6 @@ const createMovie = async (req, res) => {
       ratings,
       time,
       brief_vn,
-      brief_en,
     };
 
     if (req.files && req.files.movieImage) {
@@ -272,7 +268,6 @@ const updateMovie = async (req, res) => {
     const { id } = req.params;
     const {
       name_vn,
-      name_en,
       director,
       actor,
       release_date,
@@ -282,7 +277,6 @@ const updateMovie = async (req, res) => {
       ratings,
       time,
       brief_vn,
-      brief_en
     } = req.body;
 
     if (!id) {
@@ -291,7 +285,6 @@ const updateMovie = async (req, res) => {
 
     const movieData = {
       name_vn,
-      name_en,
       director,
       actor,
       release_date,
@@ -301,7 +294,6 @@ const updateMovie = async (req, res) => {
       ratings,
       time,
       brief_vn,
-      brief_en
     };
 
     if (req.files && req.files.movieImage) {

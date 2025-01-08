@@ -213,10 +213,6 @@
                             <input type="text" id="name-vn" value="${movie.name_vn}">
                         </div>
                         <div class="form-group-movie-manager">
-                            <label for="name-en">Name (EN):</label>
-                            <input type="text" id="name-en" value="${movie.name_en}">
-                        </div>
-                        <div class="form-group-movie-manager">
                             <label for="director">Director:</label>
                             <input type="text" id="director" value="${movie.director}">
                         </div>
@@ -250,11 +246,7 @@
                         </div>
                         <div class="form-group-movie-manager">
                             <label for="brief-vn">Brief (VN):</label>
-                            <textarea id="brief-vn">${movie.brief_vn}</textarea>
-                        </div>
-                        <div class="form-group-movie-manager">
-                            <label for="brief-en">Brief (EN):</label>
-                            <textarea id="brief-en">${movie.brief_en}</textarea>
+                            <textarea id="brief-vn" rows="5" style="min-height: 120px; width: 100%;">${movie.brief_vn}</textarea>
                         </div>
                         <div class="form-group-movie-manager">
                             <label for="movie-image">Image:</label>
@@ -297,7 +289,6 @@
 
                     const formData = new FormData();
                     formData.append("name_vn", updatedMovie.name_vn);
-                    formData.append("name_en", updatedMovie.name_en);
                     formData.append("director", updatedMovie.director);
                     formData.append("actor", updatedMovie.actor);
                     formData.append("release_date", updatedMovie.release_date);
@@ -307,7 +298,6 @@
                     formData.append("ratings", updatedMovie.ratings);
                     formData.append("time", updatedMovie.time);
                     formData.append("brief_vn", updatedMovie.brief_vn);
-                    formData.append("brief_en", updatedMovie.brief_en);
 
                     const movieImageInput = document.getElementById("movie-image");
                     if (movieImageInput.files.length > 0) {
@@ -360,10 +350,6 @@
                             <input type="text" id="name-vn" required>
                         </div>
                         <div class="form-group-movie-manager">
-                            <label for="name-en">Name (EN):</label>
-                            <input type="text" id="name-en" required>
-                        </div>
-                        <div class="form-group-movie-manager">
                             <label for="director">Director:</label>
                             <input type="text" id="director" required>
                         </div>
@@ -397,11 +383,12 @@
                         </div>
                         <div class="form-group-movie-manager">
                             <label for="brief-vn">Brief (VN):</label>
-                            <textarea id="brief-vn" required></textarea>
-                        </div>
-                        <div class="form-group-movie-manager">
-                            <label for="brief-en">Brief (EN):</label>
-                            <textarea id="brief-en" required></textarea>
+                            <textarea 
+                                id="brief-vn" 
+                                required
+                                rows="6"
+                                style="min-height: 150px; width: 100%; padding: 10px; resize: vertical;"
+                            ></textarea>
                         </div>
                         <!-- Other form fields -->
                       <div class="form-group-movie-manager">
@@ -427,7 +414,6 @@
 
                 const formData = new FormData();
                 formData.append("name_vn", document.getElementById("name-vn").value);
-                formData.append("name_en", document.getElementById("name-en").value);
                 formData.append("director", document.getElementById("director").value);
                 formData.append("actor", document.getElementById("actor").value);
                 formData.append("release_date", document.getElementById("release-date").value);
@@ -437,7 +423,6 @@
                 formData.append("ratings", document.getElementById("ratings").value);
                 formData.append("time", document.getElementById("time").value);
                 formData.append("brief_vn", document.getElementById("brief-vn").value);
-                formData.append("brief_en", document.getElementById("brief-en").value);
                 formData.append("movieImage", document.getElementById("movie-image").files[0]);
                 formData.append("backgroundImage", document.getElementById("background-image").files[0]);
                 try {
