@@ -1,8 +1,8 @@
 const moment = require('moment');
 let querystring = require('qs');
 let crypto = require("crypto");
-const { v4: uuidv4 } = require('uuid');
-const { Booking, Ticket, sequelize } = require('../../api/booking/booking_model/index'); // Adjust the path if necessary
+const {v4: uuidv4} = require('uuid');
+const {Booking, Ticket, sequelize} = require('../../api/booking/booking_model/index'); // Adjust the path if necessary
 function sortObject(obj) {
     let sorted = {};
     let str = [];
@@ -18,6 +18,7 @@ function sortObject(obj) {
     }
     return sorted;
 }
+
 const generateBookingID = () => {
     // Remove hyphens and take the first 9 characters after 'B' to make total 10
     return 'B' + uuidv4().replace(/-/g, '').slice(0, 9);
@@ -29,7 +30,7 @@ const generateTicketID = () => {
 exports.createPaymentUrl = async function (req, res, next) {
     try {
         await sequelize.transaction(async (t) => {
-            const { totalAmount, paymentMethod, selectedSeats, showtimeId } = req.body;
+            const {totalAmount, paymentMethod, selectedSeats, showtimeId} = req.body;
             const userId = "U0001";
             if (!userId || !totalAmount || !paymentMethod || !selectedSeats || !showtimeId) {
                 throw new Error('Missing required payment details.');
@@ -46,7 +47,7 @@ exports.createPaymentUrl = async function (req, res, next) {
                 paymentStatus: "Pending",
                 paymentMethod: paymentMethod,
                 bookingDateTime: date,
-            }, { transaction: t });
+            }, {transaction: t});
             const ticketPromises = selectedSeats.map(async (seat) => {
                 const ticketId = generateTicketID(); // Example: TK16342323
                 const price = 50;
@@ -57,7 +58,7 @@ exports.createPaymentUrl = async function (req, res, next) {
                     seatId: seat,
                     price: price,
                     status: 'Booked'
-                }, { transaction: t });
+                }, {transaction: t});
             });
 
             await Promise.all(ticketPromises);
@@ -94,18 +95,18 @@ exports.createPaymentUrl = async function (req, res, next) {
             vnp_Params = sortObject(vnp_Params);
 
 
-            let signData = querystring.stringify(vnp_Params, { encode: false });
+            let signData = querystring.stringify(vnp_Params, {encode: false});
 
             let hmac = crypto.createHmac("sha512", secretKey);
             let signed = hmac.update(new Buffer(signData, 'utf-8')).digest("hex");
             vnp_Params['vnp_SecureHash'] = signed;
-            vnpUrl += '?' + querystring.stringify(vnp_Params, { encode: false });
+            vnpUrl += '?' + querystring.stringify(vnp_Params, {encode: false});
             console.log(vnpUrl);
             res.redirect(vnpUrl);
         });
     } catch (error) {
         console.error('Error creating payment URL:', error);
-        res.status(500).json({ message: 'Internal Server Error.' });
+        res.status(500).json({message: 'Internal Server Error.'});
     }
 };
 exports.vnpayReturn = async function (req, res, next) {
@@ -126,7 +127,7 @@ exports.vnpayReturn = async function (req, res, next) {
         let secretKey = process.env.vnp_HashSecret; // VNPAY Secret Key
 
         // Generate the signature
-        let signData = querystring.stringify(vnp_Params, { encode: false });
+        let signData = querystring.stringify(vnp_Params, {encode: false});
         let hmac = crypto.createHmac("sha512", secretKey);
         let signed = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex");
 
@@ -140,20 +141,20 @@ exports.vnpayReturn = async function (req, res, next) {
             if (rspCode === "00") {
                 // Payment successful
                 console.log(`Payment successful for Booking ID: ${orderId}`);
-                res.render('success', { code: rspCode, message: 'Payment successful!' });
+                res.render('success', {code: rspCode, message: 'Payment successful!'});
             } else {
                 // Payment failed or other status
                 console.warn(`Payment failed for Booking ID: ${orderId} with Response Code: ${rspCode}`);
-                res.render('success', { code: rspCode, message: 'Payment failed. Please try again.' });
+                res.render('success', {code: rspCode, message: 'Payment failed. Please try again.'});
             }
         } else {
             // Invalid signature
             console.error('Invalid VNPAY signature.');
-            res.render('success', { code: '97', message: 'Invalid security hash.' });
+            res.render('success', {code: '97', message: 'Invalid security hash.'});
         }
     } catch (error) {
         console.error('Error processing VNPAY return:', error);
-        res.render('success', { message: 'An error occurred. Please contact support.' });
+        res.render('success', {message: 'An error occurred. Please contact support.'});
     }
 };
 exports.vnpayIPN = async function (req, res, next) {
@@ -172,7 +173,7 @@ exports.vnpayIPN = async function (req, res, next) {
 
         // Step 4: Generate the signature hash using the secret key
         let secretKey = process.env.vnp_HashSecret; // Ensure this environment variable is set
-        let signData = querystring.stringify(vnp_Params, { encode: false });
+        let signData = querystring.stringify(vnp_Params, {encode: false});
         let hmac = crypto.createHmac("sha512", secretKey);
         let signed = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex");
 
@@ -183,7 +184,7 @@ exports.vnpayIPN = async function (req, res, next) {
         if (secureHash === signed) { // Verify checksum
             // Step 6: Check if orderId exists in the database
             let orderId = vnp_Params['vnp_TxnRef']; // This should match bookingID
-            const booking = await Booking.findOne({ where: { bookingID: orderId } });
+            const booking = await Booking.findOne({where: {bookingID: orderId}});
             let checkOrderId = !!booking; // Boolean indicating existence
 
             if (!checkOrderId) {
@@ -214,12 +215,12 @@ exports.vnpayIPN = async function (req, res, next) {
                     await sequelize.transaction(async (t) => {
                         // Update booking payment status to 'Success'
                         booking.paymentStatus = "Paid";
-                        await booking.save({ transaction: t });
+                        await booking.save({transaction: t});
 
                         // Update associated tickets to 'Booked'
                         await Ticket.update(
-                            { status: 'Booked' },
-                            { where: { bookingID: orderId }, transaction: t }
+                            {status: 'Booked'},
+                            {where: {bookingID: orderId}, transaction: t}
                         );
                     });
 
@@ -233,12 +234,12 @@ exports.vnpayIPN = async function (req, res, next) {
                     await sequelize.transaction(async (t) => {
                         // Update booking payment status to 'Failed'
                         booking.paymentStatus = "Failed";
-                        await booking.save({ transaction: t });
+                        await booking.save({transaction: t});
 
                         // Update associated tickets to 'Canceled'
                         await Ticket.update(
-                            { status: 'Canceled' },
-                            { where: { bookingID: orderId }, transaction: t }
+                            {status: 'Canceled'},
+                            {where: {bookingID: orderId}, transaction: t}
                         );
                     });
 

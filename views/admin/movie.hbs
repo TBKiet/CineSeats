@@ -10,30 +10,18 @@
                 <div class="filter-options d-flex justify-content-between">
                     <!-- Search and Filter -->
                     <div>
-                        <input type="text" id="filter-name" placeholder="Search by movie name..." class="filter"
-                            style="width: 200px;">
+                        <input type="text" id="filter-name" placeholder="Search by movie name..." class="filter" style="width: 200px;">
                         <select id="filter-genre" class="filter" style="width: 150px;">
-                            <option value="all">All Gerne</option>
-                            <option value="Action">Action</option>
-                            <option value="Comedy">Comedy</option>
-                            <option value="Drama">Drama</option>
-                            <option value="Fantasy">Fantasy</option>
-                            <option value="Horror">Horror</option>
-                            <option value="Mystery">Mystery</option>
-                            <option value="Romance">Romance</option>
-                            <option value="Thriller">Thriller</option>
-                            <option value="Family">Family</option>
-                            <option value="Adventure">Adventure</option>
+                            <option value="all">All Genre</option>
+                            {{#each genres}}
+                                <option value="{{this}}">{{this}}</option>
+                            {{/each}}
                         </select>
                         <select id="filter-country" class="filter" style="width: 150px;">
                             <option value="all">All Country</option>
-                            <option value="VietNam">VietNam</option>
-                            <option value="America">America</option>
-                            <option value="Japan">Japan</option>
-                            <option value="Korea">Korea</option>
-                            <option value="China">China</option>
-                            <option value="Thailand">Thailand</option>
-                            <option value="Other">Other</option>
+                            {{#each countries}}
+                                <option value="{{this}}">{{this}}</option>
+                            {{/each}}
                         </select>
                         <button id="filter-button">Filter</button>
                     </div>
@@ -60,19 +48,18 @@
                 <div style="overflow-y: auto; max-height: 500px;">
                     <table id="movie-db" class="table table-striped">
                         <thead>
-                            <tr>
-                                <th style="width: 25%; position: sticky; top: 0;">Movie Name</th>
-                                <th style="width: 10%; position: sticky; top: 0;">Genre</th>
-                                <th style="width: 10%; position: sticky; top: 0;">Country</th>
-                                <th style="width: 11%; position: sticky; top: 0;">Price</th>
-                                <th style="width: 12%; position: sticky; top: 0;">Total Purchases
-                                </th>
-                                <th style="width: 12%; position: sticky; top: 0;">Released Time</th>
-                                <th style="width: 20%; position: sticky; top: 0;">Actions </th>
-                            </tr>
+                        <tr>
+                            <th style="width: 25%; position: sticky; top: 0;">Movie Name</th>
+                            <th style="width: 10%; position: sticky; top: 0;">Genre</th>
+                            <th style="width: 10%; position: sticky; top: 0;">Country</th>
+                            <th style="width: 11%; position: sticky; top: 0;">Price</th>
+                            <th style="width: 12%; position: sticky; top: 0;">Total Purchases</th>
+                            <th style="width: 12%; position: sticky; top: 0;">Released Time</th>
+                            <th style="width: 20%; position: sticky; top: 0;">Actions</th>
+                        </tr>
                         </thead>
                         <tbody>
-                            {{#each movies}}
+                        {{#each movies}}
                             <tr>
                                 <td>{{name_vn}}</td>
                                 <td>{{type_name_vn}}</td>
@@ -85,7 +72,7 @@
                                     <button>Delete</button>
                                 </td>
                             </tr>
-                            {{/each}}
+                        {{/each}}
                         </tbody>
                     </table>
                 </div>
