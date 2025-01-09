@@ -8,15 +8,16 @@
     <div class="theater-container">
         <div class="seating-container">
             {{#each rows}}
-            <div class="seat-row">
-                <div class="seat-row-label">{{rowLetter}}</div>
-                {{#each seats}}
-                <div class="seat {{status}} {{#if (eq seatVisibility 0)}} invisible{{/if}}" {{#if seatVisibility}}
-                    id="{{assignSeatId @index}}" {{/if}} data-seatId="{{seatID}}">
-                    {{rowLetter}}{{padZero seatNumber}}
+                <div class="seat-row">
+                    <div class="seat-row-label">{{rowLetter}}</div>
+                    {{#each seats}}
+                        <div class="seat {{status}} {{#if (eq seatVisibility 0)}} invisible{{/if}}" {{#if
+                                seatVisibility}}
+                             id="{{assignSeatId @index}}" {{/if}} data-seatId="{{seatID}}">
+                            {{rowLetter}}{{padZero seatNumber}}
+                        </div>
+                    {{/each}}
                 </div>
-                {{/each}}
-            </div>
             {{/each}}
         </div>
     </div>
@@ -118,6 +119,11 @@
                         <img src="vnpay-logo.png" alt="VNPAY">
                         <span>VNPAY</span>
                     </label>
+                    <label class="payment-option">
+                        <input type="radio" name="payment" value="ZALOPAY">
+                        <img src="zalopay-logo.png" alt="ZALOPAY">
+                        <span>ZaloPay</span>
+                    </label>
                 </div>
             </div>
         </div>
@@ -140,54 +146,42 @@
 
             // Get the selected payment option
             const selectedPaymentOption = document.querySelector('input[name="payment"]:checked').value;
-            if (selectedPaymentOption === 'VNPAY') {
-                // Create a form element
+            if (!selectedPaymentOption) {
+                alert('Vui lòng chọn phương thức thanh toán.');
+                return;
+            }
+
+            // Common data for all payment methods
+            const amountText = document.getElementById('payment-total-price-display').innerText;
+            const amount = amountText.replace(/\D/g, ''); // Extract numeric value
+            const seatIDs = selectedSeats.map(seat => seat.seatID);
+
+            // Payment method-specific actions
+            if (selectedPaymentOption === 'VNPAY' || selectedPaymentOption === 'ZALOPAY') {
                 const form = document.createElement('form');
                 form.method = 'POST';
-                form.action = '/payment/create_payment_url'; // Replace with your actual payment processing endpoint
+                form.action = `/payment/create_payment_url`; // Update this for ZaloPay if necessary
 
-                // Example: Add necessary hidden inputs
-                const amountText = document.getElementById('payment-total-price-display').innerText;
-                const amount = amountText.replace(/\D/g, ''); // Extract numeric value
-                // Create and append amount input
-                const inputAmount = document.createElement('input');
-                inputAmount.type = 'hidden';
-                inputAmount.name = 'totalAmount';
-                inputAmount.value = amount;
-                form.appendChild(inputAmount);
-                // Create and append paymentMethod input
-                const inputPaymentMethod = document.createElement('input');
-                inputPaymentMethod.type = 'hidden';
-                inputPaymentMethod.name = 'paymentMethod';
-                inputPaymentMethod.value = selectedPaymentOption;
-                form.appendChild(inputPaymentMethod);
+                // Add hidden inputs
+                const inputs = [
+                    { name: 'totalAmount', value: amount },
+                    { name: 'paymentMethod', value: selectedPaymentOption },
+                    { name: 'selectedSeats', value: JSON.stringify(seatIDs) },
+                    { name: 'showtimeId', value: '{{showtimeId}}' },
+                ];
 
-                // Create and append selectedSeats input
-                const inputSelectedSeats = document.createElement('input');
-                inputSelectedSeats.type = 'hidden';
-                inputSelectedSeats.name = 'selectedSeats';
-                const seatIDs = selectedSeats.map(seat => seat.seatID);
-                seatIDs.forEach(seatID => {
+                inputs.forEach(inputData => {
                     const input = document.createElement('input');
                     input.type = 'hidden';
-                    input.name = 'selectedSeats[]';
-                    input.value = seatID;
+                    input.name = inputData.name;
+                    input.value = inputData.value;
                     form.appendChild(input);
                 });
 
-                // Create and append showtimeId input
-                const inputShowtimeId = document.createElement('input');
-                inputShowtimeId.type = 'hidden';
-                inputShowtimeId.name = 'showtimeId';
-                inputShowtimeId.value = '{{showtimeId}}';
-                form.appendChild(inputShowtimeId);
-
-                // Append the form to the body and submit it
+                // Submit the form
                 document.body.appendChild(form);
                 form.submit();
             } else {
-                // Handle other payment methods if necessary
-                // For example, redirect to a different payment gateway or submit a different form
                 alert('Chức năng thanh toán cho phương thức này chưa được triển khai.');
             }
         });
@@ -223,7 +217,7 @@
                     // Get all selected seats in the same row
                     const selectedInRow = selectedSeats.filter(s => s.row === rowLetter);
                     // Tentatively add the new seat
-                    const newSelectedInRow = [...selectedInRow, { row: rowLetter, number: seatNumber, seatID: seatID }];
+                    const newSelectedInRow = [...selectedInRow, {row: rowLetter, number: seatNumber, seatID: seatID}];
                     // Extract and sort seat numbers
                     const seatNumbers = newSelectedInRow.map(s => s.number).sort((a, b) => a - b);
 
@@ -242,7 +236,7 @@
                     } else {
                         // Allow selection
                         seat.classList.add('selected');
-                        selectedSeats.push({ row: rowLetter, number: seatNumber, seatID: seatID });
+                        selectedSeats.push({row: rowLetter, number: seatNumber, seatID: seatID});
                     }
                 } else {
                     // If seat is already selected, allow deselection
@@ -275,6 +269,7 @@
             paymentSection.style.display = 'none';
             seatSection.style.display = 'block';
         });
+
         // Rectangle highlight logic (optional)
         function drawRectangle() {
             const topLeft = document.getElementById('seat-top-left');
@@ -296,6 +291,7 @@
                 rectangle.style.pointerEvents = 'none';
             }
         }
+
         drawRectangle();
         document.querySelector('.theater-container').addEventListener('scroll', drawRectangle);
         window.addEventListener('scroll', drawRectangle);
