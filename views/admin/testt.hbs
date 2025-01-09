@@ -13,16 +13,27 @@
                         <input type="text" id="filter-name" placeholder="Search by movie name..." class="filter"
                                style="width: 200px;">
                         <select id="filter-genre" class="filter" style="width: 150px;">
-                            <option value="all">All Genre</option>
-                            {{#each genres}}
-                                <option value="{{this}}">{{this}}</option>
-                            {{/each}}
+                            <option value="all">All Gerne</option>
+                            <option value="Action">Action</option>
+                            <option value="Comedy">Comedy</option>
+                            <option value="Drama">Drama</option>
+                            <option value="Fantasy">Fantasy</option>
+                            <option value="Horror">Horror</option>
+                            <option value="Mystery">Mystery</option>
+                            <option value="Romance">Romance</option>
+                            <option value="Thriller">Thriller</option>
+                            <option value="Family">Family</option>
+                            <option value="Adventure">Adventure</option>
                         </select>
                         <select id="filter-country" class="filter" style="width: 150px;">
                             <option value="all">All Country</option>
-                            {{#each countries}}
-                                <option value="{{this}}">{{this}}</option>
-                            {{/each}}
+                            <option value="VietNam">VietNam</option>
+                            <option value="America">America</option>
+                            <option value="Japan">Japan</option>
+                            <option value="Korea">Korea</option>
+                            <option value="China">China</option>
+                            <option value="Thailand">Thailand</option>
+                            <option value="Other">Other</option>
                         </select>
                         <button id="filter-button">Filter</button>
                     </div>
@@ -32,8 +43,9 @@
                         <label for="sort-by">Sort by:</label>
                         <select id="sort-by" class="filter" style="width: 150px;">
                             <option value="none">None</option>
-                            <option value="released_date">Released Date</option>
-                            <option value="end_date">End Date</option>
+                            <option value="released_time">Released Time</option>
+                            <option value="price">Price</option>
+                            <option value="total_purchase">Total Purchase</option>
                         </select>
                         <select id="sort-order" class="filter">
                             <option value="asc">Ascending</option>
@@ -52,10 +64,11 @@
                             <th style="width: 25%; position: sticky; top: 0;">Movie Name</th>
                             <th style="width: 10%; position: sticky; top: 0;">Genre</th>
                             <th style="width: 10%; position: sticky; top: 0;">Country</th>
-                            <th style="width: 10%; position: sticky; top: 0;">Age</th>
-                            <th style="width: 12%; position: sticky; top: 0;">Released Date</th>
-                            <th style="width: 12%; position: sticky; top: 0;">End Date</th>
-                            <th style="width: 20%; position: sticky; top: 0;">Actions</th>
+                            <th style="width: 11%; position: sticky; top: 0;">Price</th>
+                            <th style="width: 12%; position: sticky; top: 0;">Total Purchases
+                            </th>
+                            <th style="width: 12%; position: sticky; top: 0;">Released Time</th>
+                            <th style="width: 20%; position: sticky; top: 0;">Actions </th>
                         </tr>
                         </thead>
                         <tbody>
@@ -64,9 +77,9 @@
                                 <td>{{name_vn}}</td>
                                 <td>{{type_name_vn}}</td>
                                 <td>{{country_name_vn}}</td>
-                                <td>{{limitage_vn}}</td>
+                                <td>{{price}}</td>
+                                <td>{{totalPurchases}}</td>
                                 <td>{{release_date}}</td>
-                                <td>{{end_date}}</td>
                                 <td>
                                     <button>Edit</button>
                                     <button>Delete</button>
@@ -81,102 +94,51 @@
                         <button id="add-movie-button" class="btn btn-success mt-4">Add Movie</button>
                     </div>
                 </div>
-                <!-- Pagination Controls -->
-                <div class="pagination-controls">
-                    <button id="prev-page" class="btn btn-primary">Previous</button>
-                    <span id="current-page">1</span>
-                    <button id="next-page" class="btn btn-primary">Next</button>
-                </div>
             </div>
         </div>
     </div>
 </section>
 
 <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-        const movieTableBody = document.querySelector('#movie-db tbody');
-        const currentPageElement = document.querySelector('#current-page');
-        let currentPage = 1;
-
-        async function fetchMovies(page = 1) {
-            try {
-                // collect filter options
-                const filterName = document.getElementById('filter-name').value;
-                const filterGenre = document.getElementById('filter-genre').value;
-                const filterCountry = document.getElementById('filter-country').value;
-                // create query string
-                let query = `page=${page}`;
-                if (filterName) query += `&keyword=${filterName}`;
-                if (filterGenre !== 'all') query += `&genre=${filterGenre}`;
-                if (filterCountry !== 'all') query += `&country=${filterCountry}`;
-                // fetch movies
-                const response = await fetch(`/api/movies?${query}`);
-                const data = await response.json();
-
-                populateTable(data.movies);
-
-                // render filter options using arrays: data.genres and data.countries
-                const genreSelect = document.getElementById('filter-genre');
-                genreSelect.innerHTML = '<option value="all">All Genre</option>';
-                data.genres.forEach((genre) => {
-                    const option = document.createElement('option');
-                    option.value = genre;
-                    option.textContent = genre;
-                    genreSelect.appendChild(option);
-                });
-
-                const countrySelect = document.getElementById('filter-country');
-                countrySelect.innerHTML = '<option value="all">All Country</option>';
-                data.countries.forEach((country) => {
-                    const option = document.createElement('option');
-                    option.value = country;
-                    option.textContent = country;
-                    countrySelect.appendChild(option);
-                });
-
-
-                currentPageElement.textContent = data.currentPage;
-            } catch (error) {
-                console.error('Error fetching movies:', error);
+    document.addEventListener("DOMContentLoaded", () => {
+        // Fetch movies with optional filters
+        const fetchmovies = async (filters = {}) => {
+            const params = new URLSearchParams(filters);
+            const response = await fetch(`/admin/movies?${params.toString()}`);
+            if (response.ok) {
+                const { movies } = await response.json();
+                populatemovieTable(movies);
+            } else {
+                console.error("Error fetching movies.");
             }
-        }
+        };
 
-        function populateTable(movies) {
-            movieTableBody.innerHTML = '';
+        // Populate the movie table
+        const populatemovieTable = (movies) => {
+            const tbody = document.querySelector("#movie-db tbody");
+            tbody.innerHTML = ""; // Clear existing rows
+
             movies.forEach((movie) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-            <td>${movie.name_vn}</td>
-            <td>${movie.type_name_vn.join(', ')}</td>
-            <td>${movie.country_name_vn}</td>
-            <td>${movie.limitage_vn}</td>
-            <td>${new Date(movie.release_date).toLocaleDateString()}</td>
-            <td>${new Date(movie.end_date).toLocaleDateString()}</td>
-            <td>
-                <button class="edit-btn" data-id="${movie._id}">Edit</button>
-                <button class="delete-btn" data-id="${movie._id}">Delete</button>
-            </td>
-        `;
-                movieTableBody.appendChild(row);
+                const row = `
+                <tr>
+                    <td>${movie.name_vn}</td>
+                    <td>${movie.type_name_vn}</td>
+                    <td>${movie.country_name_vn}</td>
+                    <td>${movie.price}</td>
+                    <td>${movie.totalPurchases}</td>
+                    <td>${new Date(movie.release_date).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}</td>
+                    <td>
+                        <button class="edit-btn btn btn-sm btn-warning" data-id="${movie.id}">Edit</button>
+                        <button class="delete-btn btn btn-sm btn-danger" data-id="${movie.id}">Delete</button>
+                    </td>
+                </tr>
+            `;
+                tbody.insertAdjacentHTML("beforeend", row);
             });
+
+            // Assign event listeners to buttons (e.g., Edit/Delete)
             assignActionListeners();
-        }
-
-        document.querySelector('#prev-page').addEventListener('click', () => {
-            if (currentPage > 1) {
-                currentPage--;
-                fetchMovies(currentPage);
-            }
-        });
-
-        document.querySelector('#next-page').addEventListener('click', () => {
-            currentPage++;
-            fetchMovies(currentPage);
-        });
-
-        document.querySelector('#add-movie-button').addEventListener('click', () => {
-            showAddMovieForm();
-        });
+        };
 
         // Assign action listeners for Edit and Delete buttons
         const assignActionListeners = () => {
@@ -184,7 +146,7 @@
                 button.addEventListener("click", async () => {
                     const movieId = button.dataset.id;
                     // Fetch movie details for editing
-                    const response = await fetch(`/admin/movies/${movieId}`, {method: "GET"});
+                    const response = await fetch(`/admin/movies/${movieId}`, { method: "GET" });
                     if (response.ok) {
                         const movie = await response.json();
                         showEditForm(movie);
@@ -198,10 +160,10 @@
                 button.addEventListener("click", async () => {
                     const movieId = button.dataset.id;
                     if (confirm("Are you sure you want to delete this movie?")) {
-                        const response = await fetch(`/admin/movies/${movieId}`, {method: "DELETE"});
+                        const response = await fetch(`/admin/movies/${movieId}`, { method: "DELETE" });
                         if (response.ok) {
                             alert("Movie deleted.");
-                            await fetchMovies(); // Refresh table
+                            fetchmovies(); // Refresh table
                         } else {
                             alert("Error deleting movie.");
                         }
@@ -209,6 +171,34 @@
                 });
             });
         };
+
+        // Filter button logic
+        document.getElementById("filter-button").addEventListener("click", () => {
+            const name = document.getElementById("filter-name").value.trim();
+            const genre = document.getElementById("filter-genre").value;
+            const country = document.getElementById("filter-country").value;
+
+            // Only send filters that are applied
+            const filters = {};
+            if (name) filters.name = name;
+            if (genre && genre !== "all") filters.genre = genre;
+            if (country && country !== "all") filters.country = country;
+
+            fetchmovies(filters);
+        });
+
+        // Sort button logic
+        document.getElementById("sort-button").addEventListener("click", () => {
+            const sortBy = document.getElementById("sort-by").value;
+            const sortOrder = document.getElementById("sort-order").value;
+
+            const filters = {};
+            if (sortBy && sortBy !== "none") filters.sortBy = sortBy;
+            if (sortOrder) filters.sortOrder = sortOrder;
+
+            console.log("Sort applied:", filters); // Debugging line
+            fetchmovies(filters);
+        });
 
         // Show the edit form with the current movie details
         const showEditForm = (movie) => {
@@ -284,6 +274,7 @@
                 const updateMovie = async (id) => {
                     const updatedMovie = {
                         name_vn: document.getElementById("name-vn").value,
+                        name_en: document.getElementById("name-en").value,
                         director: document.getElementById("director").value,
                         actor: document.getElementById("actor").value,
                         release_date: new Date(document.getElementById("release-date").value),
@@ -293,6 +284,7 @@
                         ratings: document.getElementById("ratings").value,
                         time: document.getElementById("time").value,
                         brief_vn: document.getElementById("brief-vn").value,
+                        brief_en: document.getElementById("brief-en").value,
                     };
 
                     const formData = new FormData();
@@ -306,7 +298,6 @@
                     formData.append("ratings", updatedMovie.ratings);
                     formData.append("time", updatedMovie.time);
                     formData.append("brief_vn", updatedMovie.brief_vn);
-                    console.log(formData);
 
                     const movieImageInput = document.getElementById("movie-image");
                     if (movieImageInput.files.length > 0) {
@@ -434,7 +425,6 @@
                 formData.append("brief_vn", document.getElementById("brief-vn").value);
                 formData.append("movieImage", document.getElementById("movie-image").files[0]);
                 formData.append("backgroundImage", document.getElementById("background-image").files[0]);
-                console.log(formData);
                 try {
                     const response = await fetch('/admin/movies', {
                         method: 'POST',
@@ -460,12 +450,7 @@
             });
         };
 
-        // add listeners for filter button
-        document.getElementById('filter-button').addEventListener('click', async () => {
-            currentPage = 1;
-            await fetchMovies();
-        });
-
-        await fetchMovies();
+        // Initial load (fetch all movies)
+        fetchmovies();
     });
 </script>

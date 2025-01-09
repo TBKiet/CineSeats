@@ -48,7 +48,7 @@ const renderMovie = async (req, res) => {
     }
     try {
         const movies = await Movie.find();
-        res.render("admin/movie", { movies }); // Render movie management page with movie list
+        res.render("admin/movie", {movies}); // Render movie management page with movie list
     } catch (error) {
         console.error("Error loading movie management page:", error);
         res.status(500).send("Error loading movie management page.");
@@ -112,7 +112,7 @@ const deleteUser = async (req, res) => {
 // Lấy danh sách người dùng đã lọc và sắp xếp
 const getFilteredAndSortedUsers = async (req, res) => {
     try {
-        const {username, email, sortBy, sortOrder, role, page = 1, limit = 10} = req.query;
+        const {username, email, sortBy, sortOrder, role, page = 1, limit = 4} = req.query;
 
         // Build query filters
         const filter = {};
@@ -131,17 +131,11 @@ const getFilteredAndSortedUsers = async (req, res) => {
 
         // Fetch users from the database with pagination
         const {rows: users, count: totalUsers} = await User.findAndCountAll({
-            where: filter,
-            order: sort,
-            limit: parseInt(limit),
-            offset: parseInt(offset),
+            where: filter, order: sort, limit: parseInt(limit), offset: parseInt(offset),
         });
 
         res.status(200).json({
-            users,
-            totalUsers,
-            totalPages: Math.ceil(totalUsers / limit),
-            currentPage: parseInt(page)
+            users, totalUsers, totalPages: Math.ceil(totalUsers / limit), currentPage: parseInt(page)
         });
     } catch (error) {
         console.error("Error fetching users:", error);
@@ -153,23 +147,24 @@ const getFilteredAndSortedUsers = async (req, res) => {
 // Helper function to get filtered and sorted movies
 const getFilteredAndSortedMovies = async (req, res) => {
     try {
-        const {name, genre, country, sortBy, sortOrder} = req.query;
-        // Build filter query
+        const {name, genre, country, sortBy, sortOrder, page = 1, limit = 10} = req.query;
         const filter = {};
-        if (name) filter.name_vn = new RegExp(name, "i"); // Case-insensitive search
+        if (name) filter.name_vn = new RegExp(name, "i");
         if (genre && genre !== "all") filter.type_name_en = genre;
         if (country && country !== "all") filter.country_name_en = country;
 
-        // Build sort options
         const sort = {};
         if (sortBy) {
             sort[sortBy] = sortOrder === "desc" ? -1 : 1;
         }
 
-        // Fetch movies from the database
-        const movies = await Movie.find(filter).sort(sort);
+        const skip = (page - 1) * limit;
+        const movies = await Movie.find(filter).sort(sort).skip(skip).limit(parseInt(limit));
+        const totalMovies = await Movie.countDocuments(filter);
 
-        res.status(200).json({movies});
+        res.status(200).json({
+            movies, totalMovies, totalPages: Math.ceil(totalMovies / limit), currentPage: parseInt(page)
+        });
     } catch (error) {
         console.error("Error fetching movies:", error);
         res.status(500).json({message: "Internal server error"});
@@ -243,16 +238,16 @@ const createMovie = async (req, res) => {
 // Get a movie by ID
 const getMovieById = async (req, res) => {
     try {
-        const movieId = req.params.id; // Lấy giá trị `id` từ request params
-        // Tìm kiếm bằng trường `id`
-        const movie = await Movie.findOne({id: movieId});
+        const movieId = req.params.id; // Get the `id` from request parameters
+        // Find the movie by its `_id` field in MongoDB
+        const movie = await Movie.findOne({_id: movieId});
         if (!movie) {
             return res.status(404).send({message: "Movie not found"});
         }
 
-        res.json(movie); // Trả về kết quả
+        res.json(movie); // Return the movie details as JSON
     } catch (error) {
-        console.error(error); // Ghi log lỗi
+        console.error(error); // Log the error
         res.status(500).send({message: "Error fetching movie details"});
     }
 };
@@ -275,6 +270,8 @@ const updateMovie = async (req, res) => {
             brief_vn,
             brief_en
         } = req.body;
+
+        console.log(req.body);
 
         if (!id) {
             return res.status(400).json({message: "Invalid movie ID."});
@@ -332,9 +329,8 @@ const updateMovie = async (req, res) => {
 const deleteMovie = async (req, res) => {
     try {
         const {id} = req.params;
-        const deletedMovie = await Movie.findOneAndDelete({id: id}); // Sử dụng id thay vì _id
-        if (!deletedMovie)
-            return res.status(404).json({error: "Movie not found."});
+        const deletedMovie = await Movie.findOneAndDelete({_id: id}); // Sử dụng id thay vì _id
+        if (!deletedMovie) return res.status(404).json({error: "Movie not found."});
         res.status(200).json({message: "Movie deleted successfully."});
     } catch (error) {
         console.error(error);
@@ -370,20 +366,7 @@ const getTotalMoviesCount = async (req, res) => {
 
 module.exports = {
     //render
-    renderAccount,
-    renderDashBoard,
-    renderMovie,
-    //user
-    deleteUser,
-    blockUser,
-    unblockUser,
-    getFilteredAndSortedUsers,
-    getTotalUsersCount,
-    //movie
-    createMovie,
-    getMovieById,
-    updateMovie,
-    deleteMovie,
-    getFilteredAndSortedMovies,
-    getTotalMoviesCount,
+    renderAccount, renderDashBoard, renderMovie, //user
+    deleteUser, blockUser, unblockUser, getFilteredAndSortedUsers, getTotalUsersCount, //movie
+    createMovie, getMovieById, updateMovie, deleteMovie, getFilteredAndSortedMovies, getTotalMoviesCount,
 };

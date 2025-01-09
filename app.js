@@ -6,6 +6,7 @@ const passport = require("passport");
 const {engine} = require("express-handlebars");
 const path = require("path");
 const MongoStore = require("connect-mongo");
+const { allowInsecurePrototypeAccess } = require('@handlebars/allow-prototype-access');
 
 const movieRouter = require("./components/movies/movies.routes");
 const homeRouter = require("./components/home/home.routes");
@@ -85,6 +86,7 @@ app.engine(
                 return '';
             }
         },
+        handlebars: allowInsecurePrototypeAccess(require('handlebars'))
     })
 );
 
