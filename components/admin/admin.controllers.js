@@ -47,29 +47,11 @@ const renderMovie = async (req, res) => {
         return res.status(403).send("Access denied.");
     }
     try {
-        // Fetch all movies
         const movies = await Movie.find();
-        const movieData = movies.map((movie) => ({
-            id: movie.id,
-            name: movie.name_vn,
-            genre: movie.type_name_en.join(", "), // Join genres with a comma
-            country: movie.country_name_en,
-            price: movie.price || "N/A", // Default to "N/A" if price is not available
-            totalPurchases: movie.totalPurchases || 0, // Default to 0 if totalPurchase is not available
-            releasedTime:
-                movie.release_date instanceof Date
-                    ? movie.release_date.toLocaleDateString()
-                    : "Unknown", // Release date
-        }));
-
-        // Fetch distinct genres and countries
-        const genres = await Movie.distinct("type_name_vn");
-        const countries = await Movie.distinct("country_name_vn");
-
-        res.render("admin/movie", {movies: movieData, genres, countries});
+        res.render("admin/movie", { movies }); // Render movie management page with movie list
     } catch (error) {
-        console.error("Error loading movie page:", error);
-        res.status(500).send("Error loading movie page.");
+        console.error("Error loading movie management page:", error);
+        res.status(500).send("Error loading movie management page.");
     }
 };
 
