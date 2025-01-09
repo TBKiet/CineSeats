@@ -1,7 +1,7 @@
 const { Showtime, TheaterRoom, Theater } = require('../booking_model/index')
 const { getCachedData } = require('../../../config/redisConnection');
 const { Op } = require('sequelize');
-async function getShowtimes(movieId, date, city) {
+async function getShowtimes(movieId, date, city, theaterID) {
     try {
         console.time('Redis'); // Start timing
         const uniqueDatesCacheKey = `uniqueDates:all`; // Adjust if uniqueDates is context-specific
@@ -63,8 +63,11 @@ async function getShowtimes(movieId, date, city) {
             const { roomId, roomName, totalSeats, Theater: theater } = showtime.TheaterRoom;
             const { theaterId, theaterName, Location, theaterCity } = theater.dataValues;
             // If theater not mapped yet, create entry
-            // console.log(city + " " + theaterCity);
+
             if (city && theaterCity != city) {
+                continue;
+            }
+            if (theaterID && theaterId != theaterID) {
                 continue;
             }
             const currentTime = new Date();
@@ -104,4 +107,45 @@ async function getShowtimes(movieId, date, city) {
         throw error;
     }
 }
-module.exports = { getShowtimes };
+function formatDate(showtimeDate) {
+    const dateObj = new Date(showtimeDate);
+    // Format date to "DEC 29TH"
+    const month = dateObj.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+    const day = dateObj.getDate();
+    let suffix = 'TH';
+    if (day === 1 || day === 21 || day === 31) suffix = 'ST';
+    else if (day === 2 || day === 22) suffix = 'ND';
+    else if (day === 3 || day === 23) suffix = 'RD';
+    const formattedDate = `${month} ${day}${suffix}`;
+    return formattedDate;
+}
+
+async function getShowtimeById(showtimeId) {
+    try {
+        const showtime = await Showtime.findOne({
+            where: { showtimeId },
+            include: [
+                {
+                    model: TheaterRoom,
+                    attributes: ['roomId', 'roomName', 'totalSeats'],
+                    include: [
+                        {
+                            model: Theater,
+                            attributes: ['theaterId', 'theaterName', 'Location', 'theaterCity']
+                        }
+                    ]
+                }
+            ]
+        });
+        showtime.dataValues.formattedDate = formatDate(showtime.date);
+        const dateParts = showtime.date.split('-');
+        showtime.dataValues.date = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+        showtime.dataValues.year = new Date(showtime.date).getFullYear();
+        showtime.dataValues.startTime = showtime.startTime.slice(0, 5);
+        return showtime;
+    } catch (error) {
+        console.error(`Error fetching showtime with ID ${showtimeId}:`, error);
+        throw new Error(`Failed to retrieve showtime with ID ${showtimeId}.`);
+    }
+}
+module.exports = { getShowtimes, getShowtimeById };

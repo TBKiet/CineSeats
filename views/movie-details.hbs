@@ -86,9 +86,7 @@
                         <div class="showtimes">
                             {{#each showtimes}}
                             <div class="showtime" data-showtime-id="{{this.showtimeId}}"
-                                data-showtime-date="{{this.date}}" data-showtime-time="{{this.startTime}}"
-                                data-room-name="{{theaterRoom/roomName}}" data-theater-name="{{../theaterName}}"
-                                data-address="{{../address}}">
+                                data-theater-id="{{../theaterId}}" data-showtime-date="{{this.date}}">
                                 <span class="time">{{this.startTime}}</span>
                             </div>
                             {{/each}}
@@ -138,60 +136,27 @@
             if (!showtime) return;
 
             const movieId = "{{id}}";
-            const image = '{{image}}';
-            const nameVn = '{{name_vn}}';
             const showtimeId = showtime.getAttribute('data-showtime-id');
-            const showtimeDate = showtime.getAttribute('data-showtime-date');
-            const dateObj = new Date(showtimeDate);
-            // Format date to "DEC 29TH"
-            const month = dateObj.toLocaleString('en-US', { month: 'short' }).toUpperCase();
-            const day = dateObj.getDate();
-            let suffix = 'TH';
-            if (day === 1 || day === 21 || day === 31) suffix = 'ST';
-            else if (day === 2 || day === 22) suffix = 'ND';
-            else if (day === 3 || day === 23) suffix = 'RD';
-            const formattedDate = `${month} ${day}${suffix}`;
-            const year = dateObj.getFullYear();
-
-            const showtimeTime = showtime.getAttribute('data-showtime-time');
-            const roomName = showtime.getAttribute('data-room-name');
-            const theaterName = showtime.getAttribute('data-theater-name');
-            // Get the address and extract the city
-            const address = showtime.getAttribute('data-address');
-            const addressParts = address.split(',');
-            const city = addressParts[addressParts.length - 1].trim();
-            // Get the day of the week
-            const date = new Date(showtimeDate);
-            const daysOfWeek = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
-            const dayOfWeek = daysOfWeek[date.getDay()];
-
+            const theaterId = showtime.getAttribute('data-theater-id');
+            const date = showtime.getAttribute('data-showtime-date');
             if (showtimeId && movieId) {
                 // Create a form dynamically
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = `/booking/${movieId}`; // Sending to /booking/:movieId
 
-                // Create hidden inputs for all required data
+                // Create a hidden input field to store the showtime ID
                 const inputs = [
                     { name: 'showtimeId', value: showtimeId },
-                    { name: 'showtimeDate', value: showtimeDate },
-                    { name: 'formattedDate', value: formattedDate },
-                    { name: 'year', value: year },
-                    { name: 'dayOfWeek', value: dayOfWeek },
-                    { name: 'showtimeTime', value: showtimeTime },
-                    { name: 'image', value: image },
-                    { name: 'name_vn', value: nameVn },
-                    { name: 'roomName', value: roomName },
-                    { name: 'theaterName', value: theaterName },
-                    { name: 'city', value: city }
+                    { name: 'theaterId', value: theaterId },
+                    { name: 'date', value: date }
                 ];
-
-                inputs.forEach(({ name, value }) => {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = name;
-                    input.value = value;
-                    form.appendChild(input);
+                inputs.forEach(input => {
+                    const inputElement = document.createElement('input');
+                    inputElement.type = 'hidden';
+                    inputElement.name = input.name;
+                    inputElement.value = input.value;
+                    form.appendChild(inputElement);
                 });
 
                 // Append the form to the body and submit it
@@ -261,13 +226,9 @@
                 showtimeDiv.classList.add("showtime");
 
                 // Add necessary data attributes
-                showtimeDiv.setAttribute("data-showtime-theater", theater.theaterName);
                 showtimeDiv.setAttribute("data-showtime-id", showtime.showtimeId);
+                showtimeDiv.setAttribute("data-theater-id", theater.theaterId);
                 showtimeDiv.setAttribute("data-showtime-date", showtime.date);
-                showtimeDiv.setAttribute("data-showtime-time", showtime.startTime);
-                showtimeDiv.setAttribute("data-room-name", showtime.theaterRoom.roomName);
-                showtimeDiv.setAttribute("data-theater-name", theater.theaterName);
-                showtimeDiv.setAttribute("data-address", theater.address);
 
                 // Add inner content
                 showtimeDiv.innerHTML = `<span class="time">${showtime.startTime}</span>`;
