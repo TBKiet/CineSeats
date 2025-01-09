@@ -10,7 +10,8 @@
                 <div class="filter-options d-flex justify-content-between">
                     <!-- Search and Filter -->
                     <div>
-                        <input type="text" id="filter-name" placeholder="Search by movie name..." class="filter" style="width: 200px;">
+                        <input type="text" id="filter-name" placeholder="Search by movie name..." class="filter"
+                               style="width: 200px;">
                         <select id="filter-genre" class="filter" style="width: 150px;">
                             <option value="all">All Genre</option>
                             {{#each genres}}
@@ -93,7 +94,7 @@
             const params = new URLSearchParams(filters);
             const response = await fetch(`/admin/movies?${params.toString()}`);
             if (response.ok) {
-                const { movies } = await response.json();
+                const {movies} = await response.json();
                 populatemovieTable(movies);
             } else {
                 console.error("Error fetching movies.");
@@ -113,7 +114,7 @@
                     <td>${movie.country_name_vn}</td>
                     <td>${movie.price}</td>
                     <td>${movie.totalPurchases}</td>
-                    <td>${new Date(movie.release_date).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}</td>
+                    <td>${new Date(movie.release_date).toLocaleString('vi-VN', {timeZone: 'Asia/Ho_Chi_Minh'})}</td>
                     <td>
                         <button class="edit-btn btn btn-sm btn-warning" data-id="${movie.id}">Edit</button>
                         <button class="delete-btn btn btn-sm btn-danger" data-id="${movie.id}">Delete</button>
@@ -133,7 +134,7 @@
                 button.addEventListener("click", async () => {
                     const movieId = button.dataset.id;
                     // Fetch movie details for editing
-                    const response = await fetch(`/admin/movies/${movieId}`, { method: "GET" });
+                    const response = await fetch(`/admin/movies/${movieId}`, {method: "GET"});
                     if (response.ok) {
                         const movie = await response.json();
                         showEditForm(movie);
@@ -147,7 +148,7 @@
                 button.addEventListener("click", async () => {
                     const movieId = button.dataset.id;
                     if (confirm("Are you sure you want to delete this movie?")) {
-                        const response = await fetch(`/admin/movies/${movieId}`, { method: "DELETE" });
+                        const response = await fetch(`/admin/movies/${movieId}`, {method: "DELETE"});
                         if (response.ok) {
                             alert("Movie deleted.");
                             fetchmovies(); // Refresh table
