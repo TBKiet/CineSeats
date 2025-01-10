@@ -10,7 +10,6 @@ exports.getMoviesJson = async (req, res) => {
             maxDuration: req.query.maxDuration,
         }
 
-        console.log("queryParam", queryParam);
         const sortBy = req.query.sortBy;
         const sortOrder = req.query.sortOrder;
 

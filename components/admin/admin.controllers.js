@@ -1,5 +1,5 @@
 const {getTotalUsers} = require("../account/account.model");
-const {User} = require("../../api/booking/booking_model");
+const {User, Booking} = require("../../api/booking/booking_model");
 const Movie = require("../movies/movies.model");
 const {cloudinary} = require("../cloudinary/config/cloud"); // Import config của Cloudinary
 const {Op} = require("sequelize");
@@ -363,10 +363,33 @@ const getTotalMoviesCount = async (req, res) => {
         res.status(500).send("Error fetching total movies");
     }
 };
-
+const getOrder = async (req, res) => {// Assuming user info is stored in `req.user`
+    try {
+        const bookings = await Booking.findAll();
+        res.json(bookings);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({error: "Failed to fetch booking history."});
+    }
+};
+const renderOrder = async (req, res) => {
+    try {
+        if (req.isAuthenticated()) {
+            const bookings = await Booking.findAll();
+            res.render("admin/order", {bookings});
+        } else {
+            res.redirect("/login");
+        }
+    } catch (error) {
+        console.error("Error loading order:", error);
+        res.status(500).send("Error loading order.");
+    }
+};
 module.exports = {
     //render
     renderAccount, renderDashBoard, renderMovie, //user
     deleteUser, blockUser, unblockUser, getFilteredAndSortedUsers, getTotalUsersCount, //movie
     createMovie, getMovieById, updateMovie, deleteMovie, getFilteredAndSortedMovies, getTotalMoviesCount,
+    //booking
+    renderOrder, getOrder
 };

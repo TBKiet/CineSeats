@@ -1,18 +1,38 @@
 const express = require("express");
 const router = express.Router();
-const { renderAccount, renderDashBoard, renderMovie, deleteUser, blockUser, unblockUser, getFilteredAndSortedUsers, createMovie, getMovieById, updateMovie, deleteMovie, getFilteredAndSortedMovies, getTotalUsersCount, getTotalMoviesCount } = require("./admin.controllers");
-const { uploadPoster } = require('../cloudinary/config/cloud');
+const {
+    renderAccount,
+    renderDashBoard,
+    renderMovie,
+    deleteUser,
+    blockUser,
+    unblockUser,
+    getFilteredAndSortedUsers,
+    createMovie,
+    getMovieById,
+    updateMovie,
+    deleteMovie,
+    getFilteredAndSortedMovies,
+    getTotalUsersCount,
+    getTotalMoviesCount,
+    renderOrder, getOrder
+} = require("./admin.controllers");
+const {uploadPoster} = require('../cloudinary/config/cloud');
 
 // Configure Multer to accept multiple fields
 const upload = uploadPoster.fields([
-    { name: 'movieImage', maxCount: 1 },
-    { name: 'backgroundImage', maxCount: 1 }
+    {name: 'movieImage', maxCount: 1},
+    {name: 'backgroundImage', maxCount: 1}
 ]);
 
 // Routes for rendering pages
 router.get("/dashboard", renderDashBoard);
 router.get("/account", renderAccount);
 router.get("/movie", renderMovie);
+
+router.get("/order", renderOrder);
+router.get("/orders", getOrder)
+router.get("/orders/:id", getOrder)
 
 // API support account management
 router.delete('/users/:username', deleteUser);
