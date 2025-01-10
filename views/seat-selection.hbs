@@ -25,7 +25,7 @@
                 <div class="seat-row-label">{{rowLetter}}</div>
                 {{#each seats}}
                 <div class="seat {{status}} {{#if (eq seatVisibility 0)}} invisible{{/if}}" {{#if seatVisibility}}
-                    id="{{assignSeatId @index}}" {{/if}} data-seatId="{{seatID}}">
+                    id="{{assignSeatId @index}}" {{/if}} data-seatId="{{seatID}}" data-seat-price="{{price}}">
                     {{rowLetter}}{{padZero seatNumber}}
                 </div>
                 {{/each}}
@@ -38,6 +38,10 @@
         <div class="legend-item">
             <div class="seat available"></div>
             <span class="legend-text">Ghế thường</span>
+        </div>
+        <div class="legend-item">
+            <div class="seat vip"></div>
+            <span class="legend-text">Ghế VIP</span>
         </div>
         <div class="legend-item">
             <div class="seat unavailable"></div>
@@ -243,7 +247,8 @@
             return {
                 seatID: seat.getAttribute('data-seatId'),
                 rowLetter: seat.textContent.trim().charAt(0),
-                seatNumber: parseInt(seat.textContent.trim().slice(1), 10)
+                seatNumber: parseInt(seat.textContent.trim().slice(1), 10),
+                price: seat.getAttribute('data-seat-price')
             };
         }
 
@@ -275,7 +280,8 @@
         }
 
         function updateBookingInfo() {
-            const totalPrice = selectedSeats.length * seatPrice * 1000;
+            console.log(selectedSeats);
+            const totalPrice = selectedSeats.reduce((sum, seat) => sum + Number(seat.price), 0)*1000;
             const formattedPrice = formatter.format(totalPrice);
 
             document.getElementById('total-price-display').textContent = formattedPrice;
@@ -298,10 +304,12 @@
                 form.appendChild(createHiddenInput('totalAmount', amount));
                 form.appendChild(createHiddenInput('paymentMethod', selectedPaymentOption));
 
-                const seatIDs = selectedSeats.map(seat => seat.seatID);
-                seatIDs.forEach(seatID => {
-                    form.appendChild(createHiddenInput('selectedSeats[]', seatID));
-                });
+                const seatsData = JSON.stringify(selectedSeats.map(seat => ({
+                    seatId: seat.seatID,
+                    seatPrice: seat.price
+                })));
+                form.appendChild(createHiddenInput('seatsData', seatsData));
+                
 
                 form.appendChild(createHiddenInput('showtimeId', '{{showtimeId}}'));
 

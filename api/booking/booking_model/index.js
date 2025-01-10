@@ -3,6 +3,7 @@ const User = require('./User');
 const Movie = require('./Movie');
 const Theater = require('./Theater');
 const TheaterRoom = require('./TheaterRoom');
+const SeatType = require('./SeatTypes');
 const Seat = require('./Seats');
 const Showtime = require('./Showtime');
 const Booking = require('./Booking');
@@ -43,6 +44,9 @@ Ticket.belongsTo(Booking, { foreignKey: 'bookingId' });
 Seat.hasMany(Ticket, { foreignKey: 'seatId' });
 Ticket.belongsTo(Seat, { foreignKey: 'seatId' });
 
+Seat.belongsTo(SeatType, { foreignKey: 'seatType' });
+SeatType.hasMany(Seat, { foreignKey: 'seatType' });
+
 module.exports = {
     User,
     Movie,
@@ -52,6 +56,7 @@ module.exports = {
     Showtime,
     Booking,
     Ticket,
+    SeatType,
     Sequelize,
     sequelize
 };
