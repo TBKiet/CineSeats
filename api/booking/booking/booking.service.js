@@ -1,4 +1,4 @@
-const { Seat, TheaterRoom, Showtime, Ticket } = require('../booking_model');
+const { Seat, TheaterRoom, Showtime, Ticket, SeatType } = require('../booking_model');
 
 async function getSeatAvailability(showtimeId) {
     try {
@@ -26,17 +26,27 @@ async function getSeatAvailability(showtimeId) {
                         status: 'Booked'
                     },
                     attributes: ['ticketID']
+                },
+                {
+                    model: SeatType, // Added SeatType join
+                    required: true,
+                    attributes: ['seatType', 'price']
                 }
             ],
             raw: true,
+            order: [['seatID', 'ASC']]
         });
         const rows = {};
-
         seats.forEach(seat => {
             if (!rows[seat.rowLetter]) {
                 rows[seat.rowLetter] = { rowLetter: seat.rowLetter, seats: [] };
             }
-            seat.status = seat['Tickets.ticketID'] ? 'unavailable' : 'available';
+            seat.status = seat.Tickets ? 'unavailable' : 'available';
+            seat.price = seat['SeatType.price']; // Added price
+            seat.seatType = seat['SeatType.seatType']; // Added seatType
+            delete seat.SeatType;
+            delete seat['SeatType.seatType'];
+            delete seat['SeatType.price'];
             rows[seat.rowLetter].seats.push(seat);
         });
 

@@ -149,7 +149,9 @@ body {
 .seat:hover {
     background: #21a8afce;
 }
-
+.seat.vip {
+    border: 1px solid #d83565;
+}
 .seat.selected {
     background-color: #21a8afce !important;
     /* Change to your desired color */
@@ -173,7 +175,7 @@ body {
 
 #rectangle {
     position: absolute;
-    border: 2px solid red;
+    border: 2px solid #d83565;
     border-radius: 10px;
 }
 
@@ -202,6 +204,10 @@ body {
 }
 
 .legend-item .seat.selected {
+    pointer-events: none;
+}
+
+.legend-item .seat.vip {
     pointer-events: none;
 }
 
