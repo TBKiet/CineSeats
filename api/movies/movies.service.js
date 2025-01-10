@@ -1,19 +1,19 @@
 const Movie = require("./movies.model");
-const { getCachedData } = require('../../config/redisConnection'); // Import getCachedData
+const {getCachedData} = require('../../config/redisConnection'); // Import getCachedData
 
 async function fetchFilterData() {
     const result = await Movie.aggregate([
         // Unwind the array field
-        { $unwind: "$type_name_vn" },
+        {$unwind: "$type_name_vn"},
         {
             $group: {
                 _id: null, // Group all documents
-                distinctGenres: { $addToSet: "$type_name_vn" }, // Collect unique values from the array
-                distinctCountries: { $addToSet: "$country_name_vn" }, // Collect unique strings
-                distinctAges: { $addToSet: "$limitage_vn" } // Collect unique strings
+                distinctGenres: {$addToSet: "$type_name_vn"}, // Collect unique values from the array
+                distinctCountries: {$addToSet: "$country_name_vn"}, // Collect unique strings
+                distinctAges: {$addToSet: "$limitage_vn"} // Collect unique strings
             }
         },
-        { $project: { _id: 0 } } // Remove the _id field from the result
+        {$project: {_id: 0}} // Remove the _id field from the result
     ]);
 
     // Handle empty result
@@ -33,17 +33,17 @@ async function fetchFilterData() {
     return result[0];
 }
 
-async function getMovieListsByType(movieType, queryParam, page = 1, limit = 8) {
+async function getMovieListsByType(movieType, queryParam, page = 1, limit = 8, sortBy = null, sortOrder = 'asc') {
     try {
         const today = new Date();
         let filter = {};
-        const movieStates = { all: "inactive-film", showing: "inactive-film", upcoming: "inactive-film" };
+        const movieStates = {all: "inactive-film", showing: "inactive-film", upcoming: "inactive-film"};
 
         if (movieType === "/showing") {
-            filter = { release_date: { $lte: today }, end_date: { $gte: today } };
+            filter = {release_date: {$lte: today}, end_date: {$gte: today}};
             movieStates.showing = "active-film";
         } else if (movieType === "/upcoming") {
-            filter = { release_date: { $gt: today } };
+            filter = {release_date: {$gt: today}};
             movieStates.upcoming = "active-film";
         } else {
             movieStates.all = "active-film";
@@ -51,26 +51,40 @@ async function getMovieListsByType(movieType, queryParam, page = 1, limit = 8) {
 
         const query = {};
         // Build the query object based on queryParam
-        if (queryParam.name_vn) query.name_vn = { $regex: queryParam.name_vn, $options: "i" };
+        if (queryParam.name_vn) query.name_vn = {$regex: queryParam.name_vn, $options: "i"};
         if (queryParam.type_name_vn) query.type_name_vn = queryParam.type_name_vn;
         if (queryParam.limitage_vn) query.limitage_vn = queryParam.limitage_vn;
         if (queryParam.country_name_vn) query.country_name_vn = queryParam.country_name_vn;
-        const movies = await Movie.find({ ...filter, ...query }).skip((page - 1) * limit).limit(limit).lean();
-        const totalMovies = await Movie.countDocuments({ ...filter, ...query });
+        if (queryParam.minDuration && queryParam.maxDuration) {
+            query.time = {
+                $gte: parseInt(queryParam.minDuration),
+                $lte: parseInt(queryParam.maxDuration)
+            }
+        }
+        // Build sort object
+        const sortOptions = sortBy ? {[sortBy]: sortOrder === 'asc' ? 1 : -1, _id: 1} : {_id: 1};
+
+        //
+        const movies = await Movie.find({...filter, ...query})
+            .sort(sortOptions)
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .lean();
+        const totalMovies = await Movie.countDocuments({...filter, ...query});
         const totalPages = Math.ceil(totalMovies / limit);
         console.time('Filter'); // Start timing
         const result = await Movie.aggregate([
             // Unwind the array field
-            { $unwind: "$type_name_vn" },
+            {$unwind: "$type_name_vn"},
             {
                 $group: {
                     _id: null, // Group all documents
-                    distinctGenres: { $addToSet: "$type_name_vn" }, // Collect unique values from the array
-                    distinctCountries: { $addToSet: "$country_name_vn" }, // Collect unique strings
-                    distinctAges: { $addToSet: "$limitage_vn" } // Collect unique strings
+                    distinctGenres: {$addToSet: "$type_name_vn"}, // Collect unique values from the array
+                    distinctCountries: {$addToSet: "$country_name_vn"}, // Collect unique strings
+                    distinctAges: {$addToSet: "$limitage_vn"} // Collect unique strings
                 }
             },
-            { $project: { _id: 0 } } // Remove the _id field from the result
+            {$project: {_id: 0}} // Remove the _id field from the result
         ]);
 
         // Handle empty result
@@ -100,9 +114,10 @@ async function getMovieListsByType(movieType, queryParam, page = 1, limit = 8) {
             currentPage: page,
             ...movieStates, // Ensure movieStates are included in the returned object
         };
-    } catch (err) {
+    } catch
+        (err) {
         console.error("Error fetching movies:", err);
-        return { movies: [], genres: [], ages: [], countries: [], totalPages: 0, currentPage: page, ...movieStates };
+        return {movies: [], genres: [], ages: [], countries: [], totalPages: 0, currentPage: page, ...movieStates};
     }
 }
 
@@ -110,8 +125,8 @@ async function getRelatedMovies(movieData) {
     try {
         const regexGenres = new RegExp(movieData.type_name_vn.join("|"), "i");
         const relatedMovies = await Movie.find({
-            type_name_vn: { $regex: regexGenres },
-            id: { $ne: movieData.id },
+            type_name_vn: {$regex: regexGenres},
+            id: {$ne: movieData.id},
         }).lean();
 
         return relatedMovies;
@@ -122,11 +137,11 @@ async function getRelatedMovies(movieData) {
 }
 
 async function getMovieById(movieId) {
-    const movie = await Movie.findOne({ id: movieId }).lean();
+    const movie = await Movie.findOne({id: movieId}).lean();
     if (!movie) return null;
 
     const formatDate = (date) =>
-        new Date(date).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
+        new Date(date).toLocaleDateString("vi-VN", {day: "2-digit", month: "2-digit", year: "numeric"});
 
     const relatedMovies = await getRelatedMovies(movie);
 
@@ -138,4 +153,4 @@ async function getMovieById(movieId) {
     };
 }
 
-module.exports = { getMovieListsByType, getMovieById };
+module.exports = {getMovieListsByType, getMovieById};

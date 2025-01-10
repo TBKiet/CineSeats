@@ -8,8 +8,10 @@
                 <div class="container-admin">
                     <div class="filter-options d-flex justify-content-between">
                         <div>
-                            <input type="text" id="filter-username" placeholder="Search by username..." class="filter" style="width: 190px;">
-                            <input type="text" id="filter-email" placeholder="Search by email..." class="filter" style="width: 190px;">
+                            <input type="text" id="filter-username" placeholder="Search by username..." class="filter"
+                                   style="width: 190px;">
+                            <input type="text" id="filter-email" placeholder="Search by email..." class="filter"
+                                   style="width: 190px;">
                             <button id="search-button">Search</button>
                         </div>
 
@@ -27,6 +29,8 @@
                                 <option value="none">None</option>
                                 <option value="username">Username</option>
                                 <option value="email">Email</option>
+                                <option value="createdAt">Created at</option>
+
                             </select>
 
                             <select id="sort-order" class="filter">
@@ -48,6 +52,8 @@
                                 <th>Role</th>
                                 <th>Phone</th>
                                 <th>Is Active</th>
+                                <th>Created at</th>
+                                <th>Updated at</th>
                                 <th>Actions</th>
                             </tr>
                             </thead>
@@ -59,10 +65,18 @@
                                     <td>{{this.role}}</td>
                                     <td>{{this.phone}}</td>
                                     <td>{{this.isActive}}</td>
+                                    <td>{{this.createdAt}}</td>
+                                    <td>{{this.updatedAt}}</td>
                                     <td>
-                                        <button class="btn btn-danger btn-sm block-btn" data-username="{{this.username}}">Block</button>
-                                        <button class="btn btn-success btn-sm unblock-btn" data-username="{{this.username}}">Unblock</button>
-                                        <button class="btn btn-danger btn-sm delete-btn" data-username="{{this.username}}">Delete</button>
+                                        <button class="btn btn-danger btn-sm block-btn"
+                                                data-username="{{this.username}}">Block
+                                        </button>
+                                        <button class="btn btn-success btn-sm unblock-btn"
+                                                data-username="{{this.username}}">Unblock
+                                        </button>
+                                        <button class="btn btn-danger btn-sm delete-btn"
+                                                data-username="{{this.username}}">Delete
+                                        </button>
                                     </td>
                                 </tr>
                             {{/each}}
@@ -85,13 +99,28 @@
             const params = new URLSearchParams(filters);
             const response = await fetch(`/admin/users?${params.toString()}`);
             if (response.ok) {
-                const { users, totalPages, currentPage } = await response.json();
+                const {users, totalPages, currentPage} = await response.json();
                 populateUserTable(users);
                 updatePaginationControls(totalPages, currentPage);
             } else {
                 console.error("Error fetching users.");
             }
         };
+
+        function convertToStandardTime(isoString) {
+            const date = new Date(isoString);
+            const options = {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false,
+                timeZone: 'UTC'
+            };
+            return date.toLocaleString('en-US', options).replace(',', '');
+        }
 
         // Populate the user table
         const populateUserTable = (users) => {
@@ -106,6 +135,8 @@
             <td>${user.role}</td>
             <td>${user.phone}</td>
             <td>${user.isActive}</td>
+            <td>${convertToStandardTime(user.createdAt)}</td>
+            <td>${convertToStandardTime(user.updatedAt)}</td>
             <td>
               <button class="block-btn btn btn-danger btn-sm" data-username="${user.username}">Block</button>
               <button class="unblock-btn btn btn-success btn-sm" data-username="${user.username}">Unblock</button>
@@ -175,11 +206,11 @@
             document.querySelectorAll(".block-btn").forEach((button) => {
                 button.addEventListener("click", async () => {
                     const username = button.dataset.username;
-                    const response = await fetch(`/admin/users/${username}/block`, { method: "PATCH" });
+                    const response = await fetch(`/admin/users/${username}/block`, {method: "PATCH"});
                     const result = await response.json();
                     if (response.ok) {
                         alert("User blocked successfully");
-                        fetchUsers(getCurrentFilters()); // Refresh the user list
+                        await fetchUsers(getCurrentFilters()); // Refresh the user list
                     } else if (response.status === 400 && result.message === "You cannot block your own account") {
                         alert("You cannot block your own account");
                     } else {
@@ -192,10 +223,10 @@
             document.querySelectorAll(".unblock-btn").forEach((button) => {
                 button.addEventListener("click", async () => {
                     const username = button.dataset.username;
-                    const response = await fetch(`/admin/users/${username}/unblock`, { method: "PATCH" });
+                    const response = await fetch(`/admin/users/${username}/unblock`, {method: "PATCH"});
                     if (response.ok) {
                         alert("User unblocked successfully");
-                        fetchUsers(getCurrentFilters()); // Refresh the user list
+                        await fetchUsers(getCurrentFilters()); // Refresh the user list
                     } else {
                         console.error("Error unblocking user.");
                     }
@@ -206,9 +237,9 @@
             document.querySelectorAll(".delete-btn").forEach((button) => {
                 button.addEventListener("click", async () => {
                     const username = button.dataset.username;
-                    const response = await fetch(`/admin/users/${username}`, { method: "DELETE" });
+                    const response = await fetch(`/admin/users/${username}`, {method: "DELETE"});
                     if (response.ok) {
-                        fetchUsers(getCurrentFilters()); // Refresh the user list
+                        await fetchUsers(getCurrentFilters()); // Refresh the user list
                     } else {
                         console.error("Error deleting user.");
                     }
