@@ -26,7 +26,8 @@ exports.getMoviesJson = async (req, res) => {
 exports.getMovieByID = async (req, res) => {
     try {
         const movieId = req.params.id;
-        const movieData = (await getMovieById(movieId));
+        const related = !(req.query.related === 'false');
+        const movieData = (await getMovieById(movieId, related));
         res.json(movieData);
     } catch (error) {
         console.error("Error fetching movie:", error);

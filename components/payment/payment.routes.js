@@ -4,7 +4,7 @@ const paymentController = require("./payment.controller");
 const zaloPayController = require("./zaloPay.controller");
 
 // Routes for creating payment URLs
-router.post("/create_payment_url", zaloPayController.createPaymentUrl);
+router.post("/create_payment_url", paymentController.createPaymentUrl);
 
 // Routes for handling VNPAY responses and notifications
 router.get("/vnpay_return", paymentController.vnpayReturn);

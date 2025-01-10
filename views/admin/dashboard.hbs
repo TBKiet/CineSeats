@@ -111,13 +111,11 @@
         // Function to fetch and update total users
         async function fetchTotalUsers() {
             try {
-                const response = await fetch('/admin/dashboard/total-users'); // API endpoint for total users
+                const response = await fetch('/api/dashboard/total-users'); // API endpoint for total users
                 if (response.ok) {
                     const data = await response.json();
-                    console.log('Total Users Data:', data);  // Debug: check the fetched data
                     const totalUsersElement = document.getElementById('value-total-users');
                     if (totalUsersElement) {
-                        //console.log('Updating total users value');
                         totalUsersElement.textContent = data.totalUsers; // Update the element with the total users
                         totalUsers = data.totalUsers;
                         updateOverviewChart();
@@ -135,13 +133,11 @@
         // Function to fetch and update total movies
         async function fetchTotalMovies() {
             try {
-                const response = await fetch('/admin/dashboard/total-movies'); // API endpoint for total movies
+                const response = await fetch('/api/dashboard/total-movies'); // API endpoint for total movies
                 if (response.ok) {
                     const data = await response.json();
-                    console.log('Total Movies Data:', data);  // Debug: check the fetched data
                     const totalMoviesElement = document.getElementById('value-total-movies');
                     if (totalMoviesElement) {
-                        //console.log('Updating total movies value');
                         totalMoviesElement.textContent = data.totalMovies; // Update the element with the total movies
                         totalMovies = data.totalMovies;
                         updateOverviewChart();
@@ -156,17 +152,85 @@
             }
         }
 
+        // Function to fetch and update total tickets
+        async function fetchTotalTickets() {
+            try {
+                const response = await fetch('/api/dashboard/total-tickets'); // API endpoint for total tickets
+                if (response.ok) {
+                    const data = await response.json();
+                    const totalTicketsElement = document.getElementById('value-total-tickets');
+                    if (totalTicketsElement) {
+                        totalTicketsElement.textContent = data.totalTickets; // Update the element with the total tickets
+                        totalTickets = data.totalTickets;
+                        updateOverviewChart();
+                    } else {
+                        console.error('Element with id "value-total-tickets" not found');
+                    }
+                } else {
+                    console.error('Failed to fetch total tickets');
+                }
+            } catch (error) {
+                console.error('Error fetching total tickets:', error);
+            }
+        }
+
+        // Function to fetch and update total revenue
+        async function fetchTotalRevenue() {
+            try {
+                const response = await fetch('/api/dashboard/total-revenue'); // API endpoint for total revenue
+                if (response.ok) {
+                    const data = await response.json();
+                    const totalRevenueElement = document.getElementById('value-total-revenue');
+                    if (totalRevenueElement) {
+                        totalRevenueElement.textContent = data.totalRevenue; // Update the element with the total revenue
+                        totalRevenue = data.totalRevenue;
+                        updateOverviewChart();
+                    } else {
+                        console.error('Element with id "value-total-revenue" not found');
+                    }
+                } else {
+                    console.error('Failed to fetch total revenue');
+                }
+            } catch (error) {
+                console.error('Error fetching total revenue:', error);
+            }
+        }
+
+        // Function to fetch and update revenue report
+        async function fetchRevenueReport(timeRange) {
+            try {
+                const response = await fetch(`/api/dashboard/revenue-report?timeRange=${timeRange}`); // API endpoint for revenue report
+                if (response.ok) {
+                    const data = await response.json();
+                    updateRevenueReportChart(data);
+                } else {
+                    console.error('Failed to fetch revenue report');
+                }
+            } catch (error) {
+                console.error('Error fetching revenue report:', error);
+            }
+        }
+
+        // Function to update the revenue report chart
+        function updateRevenueReportChart(data) {
+            revenueReportChart.data.labels = data.labels;
+            revenueReportChart.data.datasets[0].data = data.revenue;
+            revenueReportChart.update();
+        }
+
         // Update Overview Chart with fetched data
         function updateOverviewChart() {
-            // Only update the chart if both values are fetched
-            if (totalUsers !== 0 && totalMovies !== 0) {
-                pieChart.data.datasets[0].data = [totalMovies, totalUsers, 0, 0]; // Adjust 120 for the revenue data if needed
+            // Only update the chart if all values are fetched
+            if (totalUsers !== 0 && totalMovies !== 0 && totalTickets !== 0 && totalRevenue !== 0) {
+                pieChart.data.datasets[0].data = [totalMovies, totalUsers, totalTickets, totalRevenue];
                 pieChart.update();
             }
         }
 
         document.addEventListener('DOMContentLoaded', fetchTotalUsers);
         document.addEventListener('DOMContentLoaded', fetchTotalMovies);
+        document.addEventListener('DOMContentLoaded', fetchTotalTickets);
+        document.addEventListener('DOMContentLoaded', fetchTotalRevenue);
 
         // Initialize charts
         const ctxPie = document.getElementById('pieChart').getContext('2d');
@@ -179,7 +243,7 @@
                 labels: ['Movies', 'Users', 'Tickets Sold', 'Revenue Earned'],
                 datasets: [{
                     data: [0, 0, 0, 0],
-                    backgroundColor: ['#ff9800', '#4caf50', '#f44336'],
+                    backgroundColor: ['#ff9800', '#4caf50', '#f44336', '#03a9f4'],
                 }]
             },
             options: {
@@ -213,10 +277,10 @@
         const revenueReportChart = new Chart(ctxRevenueReport, {
             type: 'line',
             data: {
-                labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5'],
+                labels: [],
                 datasets: [{
                     label: 'Revenue',
-                    data: [100, 200, 150, 300, 250],
+                    data: [],
                     borderColor: '#4caf50',
                     fill: false,
                 }]
@@ -249,14 +313,17 @@
                 }
             }
         });
-        // Event listeners for report generation
+
+        // Event listener for report generation
         document.getElementById('generate-report').addEventListener('click', () => {
-            // Logic to update revenue report based on selected time range
-            alert('Revenue report generated for: ' + document.getElementById('time-range').value);
+            const timeRange = document.getElementById('time-range').value;
+            fetchRevenueReport(timeRange);
         });
+
+        // Event listener for top revenue by product report generation
         document.getElementById('generate-product-report').addEventListener('click', () => {
-            // Logic to update top revenue report based on selected time range
-            alert('Top revenue by product generated for: ' + document.getElementById('product-time-range').value);
+            const timeRange = document.getElementById('product-time-range').value;
+            fetchRevenueReport(timeRange);
         });
     </script>
     <style>

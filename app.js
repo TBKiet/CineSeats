@@ -24,6 +24,8 @@ const cineseatsDBConnection = require('./config/cineseatsDBConnection');
 const apiMoviesRouter = require('./api/movies/movies.routes');
 const apiShowtimeRouter = require('./api/booking/showtime/showtime.routes');
 const apiBookingRouter = require('./api/booking/booking/booking.routes');
+const apiReservedRouter = require('./api/reserved/reserved.routes');
+const apiDashboardRoutes = require('./api/dashboard/dashboard.routes');
 
 const app = express();
 const PORT = 3000;
@@ -37,6 +39,9 @@ app.use(express.urlencoded({extended: true}));
 app.use('/api/movies', apiMoviesRouter);
 app.use('/api/showtime', apiShowtimeRouter);
 app.use('/api/booking', apiBookingRouter);
+app.use('/api/reserved', apiReservedRouter);
+app.use('/api/dashboard', apiDashboardRoutes);
+
 // Set up session middleware with MongoDB store
 app.use(session({
     secret: process.env.SESSION_SECRET, // Replace with your own secret

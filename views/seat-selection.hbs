@@ -1,4 +1,17 @@
 <section id="seatSection">
+    <div class="time-selector">
+        <div class="time-container">
+            <span class="selector-label">Đổi suất chiếu</span>
+            <div class="time-options">
+                {{#each relevantShowtime}}
+                <button class="time-button {{#if (eq showtimeId ../showtimeId)}} active{{/if}}"
+                    data-showtime-id="{{this.showtimeId}}"
+                    data-room-name="{{this.theaterRoom.roomName}}">{{this.startTime}}
+                </button>
+                {{/each}}
+            </div>
+        </div>
+    </div>
     <div class="screen-container">
         <div class="screen">
             <div class="screen-text">Screen</div>
@@ -8,16 +21,15 @@
     <div class="theater-container">
         <div class="seating-container">
             {{#each rows}}
-                <div class="seat-row">
-                    <div class="seat-row-label">{{rowLetter}}</div>
-                    {{#each seats}}
-                        <div class="seat {{status}} {{#if (eq seatVisibility 0)}} invisible{{/if}}" {{#if
-                                seatVisibility}}
-                             id="{{assignSeatId @index}}" {{/if}} data-seatId="{{seatID}}">
-                            {{rowLetter}}{{padZero seatNumber}}
-                        </div>
-                    {{/each}}
+            <div class="seat-row">
+                <div class="seat-row-label">{{rowLetter}}</div>
+                {{#each seats}}
+                <div class="seat {{status}} {{#if (eq seatVisibility 0)}} invisible{{/if}}" {{#if seatVisibility}}
+                    id="{{assignSeatId @index}}" {{/if}} data-seatId="{{seatID}}" data-seat-price="{{price}}">
+                    {{rowLetter}}{{padZero seatNumber}}
                 </div>
+                {{/each}}
+            </div>
             {{/each}}
         </div>
     </div>
@@ -26,6 +38,10 @@
         <div class="legend-item">
             <div class="seat available"></div>
             <span class="legend-text">Ghế thường</span>
+        </div>
+        <div class="legend-item">
+            <div class="seat vip"></div>
+            <span class="legend-text">Ghế VIP</span>
         </div>
         <div class="legend-item">
             <div class="seat unavailable"></div>
@@ -37,30 +53,6 @@
         </div>
     </div>
     <div id="rectangle"></div>
-
-    <div class="bottom-rectangle">
-        <div class="movie-infos">
-            <h3 class="movie-title">{{name_vn}}</h3>
-            <div class="show-details">
-                <span class="theater-name">{{theaterName}}</span>
-                <span class="separator">•</span>
-                <span class="showtime">{{showtimeDate}}, {{showtimeTime}}</span>
-            </div>
-        </div>
-        <div class="timer-booking-container">
-            <div class="booking-info">
-                <div class="total-price">
-                    <span>Tổng tiền: </span>
-                    <span id="total-price-display">0 đ</span>
-                </div>
-                <button class="book-button">Đặt vé</button>
-            </div>
-            <div class="timer-container">
-                <span class="timer-label">Thời gian giữ vé:</span>
-                <span class="countdown">5:00</span>
-            </div>
-        </div>
-    </div>
 </section>
 
 <!-- Hidden Payment Section: show after user clicks "Đặt vé" -->
@@ -85,7 +77,7 @@
                         <div class="time">
                             <p>Số Vé: <span id="seatCount">0</span></p>
                             <p>Tổng tiền: <span id="payment-total-price-display">0 đ</span></p>
-                            <p>{{roomName}} <span>|</span> {{showtimeTime}}</p>
+                            <p id="room">{{roomName}} <span>|</span> {{showtimeTime}}</p>
                         </div>
                         <p class="location">
                             <span>{{theaterName}}</span>
@@ -111,18 +103,13 @@
                 <div class="payment-options">
                     <label class="payment-option">
                         <input type="radio" name="payment" value="MoMo">
-                        <img src="momo-logo.png" alt="MoMo">
+                        <img src="/images/momo-logo.png" alt="MoMo">
                         <span>Ví Điện Tử MoMo</span>
                     </label>
                     <label class="payment-option">
                         <input type="radio" name="payment" value="VNPAY">
-                        <img src="vnpay-logo.png" alt="VNPAY">
+                        <img src="/images/vnpay-logo.png" alt="VNPAY">
                         <span>VNPAY</span>
-                    </label>
-                    <label class="payment-option">
-                        <input type="radio" name="payment" value="ZALOPAY">
-                        <img src="zalopay-logo.png" alt="ZALOPAY">
-                        <span>ZaloPay</span>
                     </label>
                 </div>
             </div>
@@ -137,140 +124,291 @@
         </div>
     </div>
 </section>
-
+<div class="bottom-rectangle">
+    <div class="movie-infos">
+        <h3 class="movie-title">{{name_vn}}</h3>
+        <div class="show-details">
+            <span class="theater-name">{{theaterName}}</span>
+            <span class="separator">•</span>
+            <span class="showtime">{{showtimeDate}}, {{showtimeTime}}</span>
+        </div>
+    </div>
+    <div class="timer-booking-container">
+        <div class="booking-info">
+            <div class="total-price">
+                <span>Tổng tiền: </span>
+                <span id="total-price-display">0 đ</span>
+            </div>
+            <button class="book-button">Đặt vé</button>
+        </div>
+        <div class="timer-container">
+            <span class="timer-label">Thời gian giữ vé:</span>
+            <span class="countdown">5:00</span>
+        </div>
+    </div>
+</div>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const paymentBtn = document.querySelector('.payment-btn');
-        paymentBtn.addEventListener('click', function (e) {
-            e.preventDefault();
+        // --- Showtime ID ---
+        let showtimeId = '{{showtimeId}}';
+        // --- Showtime Button Selection ---
+        const timeButtons = document.querySelectorAll('.time-button');
 
-            // Get the selected payment option
-            const selectedPaymentOption = document.querySelector('input[name="payment"]:checked').value;
-            if (!selectedPaymentOption) {
-                alert('Vui lòng chọn phương thức thanh toán.');
-                return;
-            }
+        timeButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove 'active' class from all buttons
+                timeButtons.forEach(btn => btn.classList.remove('active'));
+                // Add 'active' class to the clicked button
+                button.classList.add('active');
 
-            // Common data for all payment methods
-            const amountText = document.getElementById('payment-total-price-display').innerText;
-            const amount = amountText.replace(/\D/g, ''); // Extract numeric value
-            const seatIDs = selectedSeats.map(seat => seat.seatID);
+                // Update showtime information
+                const newTime = button.textContent.trim();
+                const selectedShowtimeId = button.getAttribute('data-showtime-id');
+                const roomName = button.getAttribute('data-room-name');
 
-            // Payment method-specific actions
-            if (selectedPaymentOption === 'VNPAY' || selectedPaymentOption === 'ZALOPAY') {
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = `/payment/create_payment_url`; // Update this for ZaloPay if necessary
+                // Fetch seat data and render seat selection
+                fetch('/booking', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ showtimeId: selectedShowtimeId })
+                }).then(response => response.json())
+                    .then(data => {
+                        renderSeatSelection(data);
+                        showtimeId = selectedShowtimeId;
+                        document.querySelector('#room').textContent = `${roomName} | ${newTime}`;
+                        document.querySelector('.showtime').textContent = `${"{{showtimeDate}}"}, ${newTime}`;
+                        drawRectangle();
+                    })
+                    .catch(err => console.error("Error:", err));
+            });
+        });
 
-                // Add hidden inputs
-                const inputs = [
-                    { name: 'totalAmount', value: amount },
-                    { name: 'paymentMethod', value: selectedPaymentOption },
-                    { name: 'selectedSeats', value: JSON.stringify(seatIDs) },
-                    { name: 'showtimeId', value: '{{showtimeId}}' },
-                ];
+        // --- Seat Selection Rendering ---
+        function renderSeatSelection(data) {
+            resetSeats();
 
-                inputs.forEach(inputData => {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = inputData.name;
-                    input.value = inputData.value;
-                    form.appendChild(input);
+            const theaterContainer = document.querySelector('.theater-container');
+            const seatingContainer = document.createElement('div');
+            seatingContainer.classList.add('seating-container');
+
+            let indexCount = 0;
+            data.rows.forEach(row => {
+                const seatRow = document.createElement('div');
+                seatRow.classList.add('seat-row');
+
+                // Row label
+                const rowLabel = document.createElement('div');
+                rowLabel.classList.add('seat-row-label');
+                rowLabel.textContent = row.rowLetter;
+                seatRow.appendChild(rowLabel);
+
+                // Seats
+                row.seats.forEach(seat => {
+                    const seatDiv = document.createElement('div');
+                    seatDiv.classList.add('seat', seat.status);
+                    seatDiv.setAttribute('data-seatId', seat.seatID);
+                    seatDiv.setAttribute('data-seat-price', seat.price);
+                    if (seat.seatVisibility === 0) {
+                        seatDiv.classList.add('invisible');
+                    } else if (seat.seatVisibility) {
+                        seatDiv.id = indexCount === 0 ? 'seat-top-left' : 'seat-bottom-right';
+                        indexCount = 1;
+                    }
+
+                    //seatDiv.dataset.seatId = seat.seatID;
+                    seatDiv.textContent = seat.seatNumber < 10
+                        ? `${seat.rowLetter}0${seat.seatNumber}`
+                        : `${seat.rowLetter}${seat.seatNumber}`;
+                    seatRow.appendChild(seatDiv);
                 });
 
-                // Submit the form
-                document.body.appendChild(form);
-                form.submit();
-            } else {
-                alert('Chức năng thanh toán cho phương thức này chưa được triển khai.');
-            }
-        });
-        const seatElements = document.querySelectorAll('.seat.available:not(.invisible)');
-        const totalPriceDisplay = document.getElementById('total-price-display');
-        const paymentTotalPriceDisplay = document.getElementById('payment-total-price-display'); // Added
-        const seatPrice = 50;
-        let selectedSeats = [];
+                seatingContainer.appendChild(seatRow);
+            });
 
-        // VND formatter
+            theaterContainer.innerHTML = '';
+            theaterContainer.appendChild(seatingContainer);
+        }
+
+        // --- Seat Selection Logic ---
+        const selectedSeats = [];
+        const seatPrice = 50;
         const formatter = new Intl.NumberFormat('vi-VN', {
             style: 'currency',
             currency: 'VND',
             minimumFractionDigits: 0
         });
 
-        function updateBookingInfo() {
-            const totalPrice = selectedSeats.length * seatPrice * 1000;
-            const formattedPrice = formatter.format(totalPrice);
-            totalPriceDisplay.textContent = formattedPrice; // Pass to bottom rectangle
-            paymentTotalPriceDisplay.textContent = formattedPrice; // Pass to payment section
+        function toggleSeatSelection(seat) {
+            seat.classList.toggle('selected');
         }
 
-        // Toggle seat selection
-        seatElements.forEach(seat => {
-            seat.addEventListener('click', () => {
-                const seatID = seat.getAttribute('data-seatId');
-                const seatText = seat.textContent.trim(); // e.g., "A1"
-                const rowLetter = seatText.charAt(0); // "A"
-                const seatNumber = parseInt(seatText.slice(1), 10); // 1
+        function getSeatData(seat) {
+            return {
+                seatID: seat.getAttribute('data-seatId'),
+                rowLetter: seat.textContent.trim().charAt(0),
+                seatNumber: parseInt(seat.textContent.trim().slice(1), 10),
+                price: seat.getAttribute('data-seat-price')
+            };
+        }
 
-                if (!seat.classList.contains('selected')) {
-                    // Get all selected seats in the same row
-                    const selectedInRow = selectedSeats.filter(s => s.row === rowLetter);
-                    // Tentatively add the new seat
-                    const newSelectedInRow = [...selectedInRow, {row: rowLetter, number: seatNumber, seatID: seatID}];
-                    // Extract and sort seat numbers
-                    const seatNumbers = newSelectedInRow.map(s => s.number).sort((a, b) => a - b);
+        document.querySelector('.theater-container').addEventListener('click', event => {
+            const seat = event.target.closest('.seat.available:not(.invisible)');
+            if (!seat) return;
 
-                    // Check for single-seat gaps
-                    let hasSingleSeatGap = false;
-                    for (let i = 1; i < seatNumbers.length; i++) {
-                        if (seatNumbers[i] - seatNumbers[i - 1] === 2) {
-                            hasSingleSeatGap = true;
-                            break;
-                        }
-                    }
+            // 1. Get seat data
+            const { seatID } = getSeatData(seat);
+            const seatIndex = selectedSeats.findIndex(s => s.seatID === seatID);
 
-                    if (hasSingleSeatGap) {
-                        // Prevent selection if a single-seat gap is created
-                        alert('Việc chọn ghế của bạn không được để trống 1 ghế trên cùng một hàng ghế mà bạn vừa chọn.');
-                    } else {
-                        // Allow selection
-                        seat.classList.add('selected');
-                        selectedSeats.push({row: rowLetter, number: seatNumber, seatID: seatID});
-                    }
-                } else {
-                    // If seat is already selected, allow deselection
-                    seat.classList.remove('selected');
-                    selectedSeats = selectedSeats.filter(s => !(s.row === rowLetter && s.number === seatNumber));
-                }
+            // 2. If seat not selected yet, add
+            if (seatIndex === -1) {
+                seat.classList.add('selected');
+                selectedSeats.push(getSeatData(seat));
+            }
+            // 3. Otherwise remove it
+            else {
+                seat.classList.remove('selected');
+                selectedSeats.splice(seatIndex, 1);
+            }
 
-                updateBookingInfo();
-            });
+            updateBookingInfo();
         });
 
+        function resetSeats() {
+            selectedSeats.length = 0;
+            updateBookingInfo();
+        }
+
+        function updateBookingInfo() {
+            console.log(selectedSeats);
+            const totalPrice = selectedSeats.reduce((sum, seat) => sum + Number(seat.price), 0)*1000;
+            const formattedPrice = formatter.format(totalPrice);
+
+            document.getElementById('total-price-display').textContent = formattedPrice;
+            document.getElementById('payment-total-price-display').textContent = formattedPrice;
+        }
+
+        // --- Payment Logic ---
+        const paymentBtn = document.querySelector('.payment-btn');
+        paymentBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            const selectedPaymentOption = document.querySelector('input[name="payment"]:checked').value;
+            if (selectedPaymentOption === 'VNPAY') {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/payment/create_payment_url';
+
+                // Add necessary hidden inputs
+                const amount = document.getElementById('payment-total-price-display').innerText.replace(/\D/g, '');
+                form.appendChild(createHiddenInput('totalAmount', amount));
+                form.appendChild(createHiddenInput('paymentMethod', selectedPaymentOption));
+
+                const seatsData = JSON.stringify(selectedSeats.map(seat => ({
+                    seatId: seat.seatID,
+                    seatPrice: seat.price
+                })));
+                form.appendChild(createHiddenInput('seatsData', seatsData));
+                
+
+                form.appendChild(createHiddenInput('showtimeId', '{{showtimeId}}'));
+
+                document.body.appendChild(form);
+                form.submit();
+            } else {
+                alert('Chức năng thanh toán cho phương thức này chưa được triển khai.');
+            }
+        });
+
+        function createHiddenInput(name, value) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = value;
+            return input;
+        }
+
+        // --- Navigation Logic ---
         const bookButton = document.querySelector('.book-button');
+        const backButton = document.querySelector('.back-btn');
         const seatSection = document.getElementById('seatSection');
         const paymentSection = document.getElementById('paymentSection');
         const seatCount = document.getElementById('seatCount');
 
-        // On click, hide seat selection, show payment
-        bookButton.addEventListener('click', () => {
+        bookButton.addEventListener('click', async () => {
             if (selectedSeats.length === 0) {
                 alert('Vui lòng chọn ghế trước khi đặt vé');
                 return;
             }
-            seatCount.textContent = selectedSeats.length;
-            seatSection.style.display = 'none';
-            paymentSection.style.display = 'block';
-        });
-        // Implement back button functionality
-        const backButton = document.querySelector('.back-btn');
-        backButton.addEventListener('click', () => {
-            paymentSection.style.display = 'none';
-            seatSection.style.display = 'block';
+            try {
+                // Prepare the API calls
+                const selectedSeatIds = selectedSeats.map(seat => seat.seatID);
+                console.log(selectedSeatIds);
+                const validateSeatsPromise = fetch('/api/booking/validate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ showtimeId, seatIds: selectedSeatIds })
+                }).then(response => response.json());
+
+                const reserveSeatsPromise = fetch('/api/reserved', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ showtimeId, seatIds: selectedSeatIds })
+                }).then(response => response.json());
+
+                // Execute both API calls concurrently
+                const [validateResult, reserveResult] = await Promise.all([validateSeatsPromise, reserveSeatsPromise]);
+
+                // Check the results
+                if (validateResult.success && reserveResult.success) {
+                    seatCount.textContent = selectedSeats.length;
+                    seatSection.style.display = 'none';
+                    paymentSection.style.display = 'block';
+                } else {
+                    let errorMessage = 'Failed to reserve seats.';
+                    console.log(validateResult.success);
+                    if (!validateResult.success || !reserveResult.success) {
+                        errorMessage = 'One or more selected seats are already booked.';
+                    }
+                    alert(errorMessage);
+                }
+            } catch (error) {
+                console.error('Error during seat reservation:', error);
+                alert('An unexpected error occurred. Please try again later.');
+            }
         });
 
-        // Rectangle highlight logic (optional)
+        backButton.addEventListener('click', () => {
+            if (confirm('Vé của bạn sẽ bị hủy nếu bạn quay lại trang trước. Bạn có chắc chắn muốn quay lại?')) {
+                fetch('/api/reserved/cancel', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ showtimeId, seatIds: selectedSeats.map(seat => seat.seatID) })
+                }).then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            paymentSection.style.display = 'none';
+                            seatSection.style.display = 'block';
+                            drawRectangle();
+                        } else {
+                            alert('Failed to cancel seat reservation.');
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error during seat cancellation:', err);
+                        alert('An unexpected error occurred. Please try again later.');
+                    });
+            }
+        });
+
+        // --- Rectangle Highlight Logic ---
         function drawRectangle() {
             const topLeft = document.getElementById('seat-top-left');
             const bottomRight = document.getElementById('seat-bottom-right');
@@ -279,22 +417,26 @@
                 const rectangle = document.getElementById('rectangle');
                 const topLeftRect = topLeft.getBoundingClientRect();
                 const bottomRightRect = bottomRight.getBoundingClientRect();
-                const left = topLeftRect.left + window.scrollX - expandBy / 2;
-                const top = topLeftRect.top + window.scrollY - expandBy / 2;
-                const width = bottomRightRect.right - topLeftRect.left + expandBy / 2 + 4;
-                const height = bottomRightRect.bottom - topLeftRect.top + expandBy / 2 + 4;
-                rectangle.style.left = `${left}px`;
-                rectangle.style.top = `${top}px`;
-                rectangle.style.width = `${width}px`;
-                rectangle.style.height = `${height}px`;
+
+                rectangle.style.left = `${topLeftRect.left + window.scrollX - expandBy / 2}px`;
+                rectangle.style.top = `${topLeftRect.top + window.scrollY - expandBy / 2}px`;
+                rectangle.style.width = `${bottomRightRect.right - topLeftRect.left + expandBy / 2 + 4}px`;
+                rectangle.style.height = `${bottomRightRect.bottom - topLeftRect.top + expandBy / 2 + 4}px`;
                 rectangle.style.position = 'absolute';
                 rectangle.style.pointerEvents = 'none';
             }
         }
-
         drawRectangle();
-        document.querySelector('.theater-container').addEventListener('scroll', drawRectangle);
-        window.addEventListener('scroll', drawRectangle);
-        window.addEventListener('resize', drawRectangle);
+        const debouncedDraw = debounce(drawRectangle, 10);
+        document.querySelector('.theater-container').addEventListener('scroll', debouncedDraw);
+        window.addEventListener('resize', debouncedDraw);
+
+        function debounce(func, wait) {
+            let timeout;
+            return function (...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
     });
 </script>

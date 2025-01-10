@@ -1,6 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../../../config/cineseatsDBConnection');
 const TheaterRoom = require('./TheaterRoom');
+const SeatType = require('./SeatTypes');
 
 const Seat = sequelize.define('Seat', {
     seatID: {
@@ -43,6 +44,17 @@ const Seat = sequelize.define('Seat', {
         field: 'Visibility',
         type: DataTypes.BOOLEAN,
         allowNull: true
+    },
+    seatType: { // New Column
+        field: 'SeatType',
+        type: DataTypes.ENUM('VIP', 'Normal'),
+        allowNull: false,
+        references: {
+            model: SeatType,
+            key: 'SeatType'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
     },
     Status: {
         type: DataTypes.VIRTUAL,

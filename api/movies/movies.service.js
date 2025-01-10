@@ -136,13 +136,13 @@ async function getRelatedMovies(movieData) {
     }
 }
 
-async function getMovieById(movieId) {
-    const movie = await Movie.findOne({id: movieId}).lean();
+async function getMovieById(movieId, related = true) {
+    const movie = await Movie.findOne({ id: movieId }).lean();
     if (!movie) return null;
 
     const formatDate = (date) =>
-        new Date(date).toLocaleDateString("vi-VN", {day: "2-digit", month: "2-digit", year: "numeric"});
-
+        new Date(date).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
+    if (!related) return { ...movie, release_date: formatDate(movie.release_date), end_date: formatDate(movie.end_date) };
     const relatedMovies = await getRelatedMovies(movie);
 
     return {
@@ -153,4 +153,4 @@ async function getMovieById(movieId) {
     };
 }
 
-module.exports = {getMovieListsByType, getMovieById};
+module.exports = { getMovieListsByType, getMovieById };
