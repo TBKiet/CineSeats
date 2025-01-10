@@ -3,7 +3,7 @@ const { Seat, TheaterRoom, Showtime, Ticket } = require('../booking_model');
 async function getSeatAvailability(showtimeId) {
     try {
         const seats = await Seat.findAll({
-            attributes: ['seatID', 'rowLetter', 'seatNumber','seatVisibility'],
+            attributes: ['seatID', 'rowLetter', 'seatNumber', 'seatVisibility'],
             include: [
                 {
                     model: TheaterRoom,
@@ -47,5 +47,19 @@ async function getSeatAvailability(showtimeId) {
         throw new Error(`Failed to retrieve seat availability for showtimeID ${showtimeId}.`);
     }
 }
-
-module.exports = { getSeatAvailability };
+async function validateSeatsService(showtimeId, seatIds) {
+    try {
+        const existingTickets = await Ticket.findAll({
+            where: {
+                showtimeID: showtimeId,
+                seatID: seatIds,
+                status: 'Booked'
+            }
+        });
+        return existingTickets.length === 0;
+    } catch (error) {
+        console.error(`Error validating seats for showtimeID ${showtimeId}:`, error);
+        throw new Error(`Failed to validate seats for showtimeID ${showtimeId}.`);
+    }
+}
+module.exports = { getSeatAvailability, validateSeatsService };

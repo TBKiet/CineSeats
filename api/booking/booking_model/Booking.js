@@ -1,4 +1,4 @@
-const {DataTypes} = require('sequelize');
+const { DataTypes } = require('sequelize');
 const sequelize = require('../../../config/cineseatsDBConnection');
 const User = require('./User');
 
@@ -14,7 +14,7 @@ const Booking = sequelize.define('Booking', {
     },
     username: {
         field: 'username',
-        type: DataTypes.STRING(50),
+        type: DataTypes.STRING(10),
         allowNull: false,
         references: {
             model: User,
@@ -42,9 +42,12 @@ const Booking = sequelize.define('Booking', {
         }
     },
     paymentMethod: {
-        type: DataTypes.STRING,
+        field: 'PaymentMethod',
+        type: DataTypes.ENUM('VNPAY', 'MoMo'),
+        allowNull: false,
+        defaultValue: 'VNPAY',
         validate: {
-            isIn: [['CREDIT_CARD', 'PAYPAL', 'ZALOPAY', 'VNPAY']] // Add 'ZALOPAY' to the list of valid values
+            isIn: [['VNPAY', 'MoMo']]
         }
     },
     bookingDateTime: {
