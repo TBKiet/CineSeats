@@ -4,6 +4,16 @@
         <!-- Booking History Section -->
         <section class="p-4 bg-white rounded shadow" style="max-width: 1000px; margin: 0 auto;">
             <h1 class="mb-4 fw-bold">Booking History</h1>
+            <div class="mb-3">
+                <input type="text" id="filter-input" placeholder="Filter by username" class="form-control" style="max-width: 300px; display: inline-block;">
+                <select id="payment-status-filter" class="form-control" style="max-width: 200px; display: inline-block;">
+                    <option value="">All</option>
+                    <option value="Paid">Paid</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Failed">Failed</option>
+                </select>
+                <button id="filter-button" class="btn btn-primary">Filter</button>
+            </div>
             <table class="table table-striped">
                 <thead>
                 <tr>
@@ -13,6 +23,7 @@
                     <th>Payment Method</th>
                     <th>Payment Status</th>
                     <th>Booking Date</th>
+                    <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody id="booking-history-body">
@@ -31,6 +42,41 @@
         <div id="booking-details-content">
             <!-- Booking details will be populated here -->
         </div>
+    </div>
+</div>
+
+<!-- Modal for Editing Booking -->
+<div id="edit-booking-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-edit">&times;</span>
+        <h2>Edit Booking</h2>
+        <form id="edit-booking-form">
+            <div class="form-group">
+                <label for="edit-username">Username:</label>
+                <input type="text" id="edit-username" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-total-amount">Total Amount:</label>
+                <input type="number" id="edit-total-amount" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-payment-method">Payment Method:</label>
+                <input type="text" id="edit-payment-method" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="edit-payment-status">Payment Status:</label>
+                <select id="edit-payment-status" class="form-control" required>
+                    <option value="Paid">Paid</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Failed">Failed</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="edit-booking-date">Booking Date:</label>
+                <input type="datetime-local" id="edit-booking-date" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </form>
     </div>
 </div>
 
@@ -80,15 +126,14 @@
         width: 80%;
     }
 
-    .close {
+    .close, .close-edit {
         color: #aaa;
         float: right;
         font-size: 28px;
         font-weight: bold;
     }
 
-    .close:hover,
-    .close:focus {
+    .close:hover, .close:focus, .close-edit:hover, .close-edit:focus {
         color: black;
         text-decoration: none;
         cursor: pointer;
@@ -114,39 +159,61 @@
     document.addEventListener("DOMContentLoaded", async () => {
         const bookingHistoryBody = document.getElementById("booking-history-body");
 
-        try {
-            const response = await fetch('/admin/booking', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            if (!response.ok)
-                alert('Failed to fetch booking history');
-
-            const data = await response.json();
-            bookingHistoryBody.innerHTML = data.map(booking => `
-            <tr class="booking-row" data-booking-id="${booking.bookingID}">
-                <td>${booking.bookingID}</td>
-                <td>${booking.username}</td>
-                <td>${booking.totalAmount}</td>
-                <td>${booking.paymentMethod}</td>
-                <td>${booking.paymentStatus}</td>
-                <td>${convertToStandardTime(booking.bookingDateTime)}</td>
-            </tr>
-        `).join('');
-
-            // Add click event listener to each row
-            document.querySelectorAll('.booking-row').forEach(row => {
-                row.addEventListener('click', async (event) => {
-                    const bookingId = event.currentTarget.getAttribute('data-booking-id');
-                    await showBookingDetails(bookingId);
+        async function fetchBookingHistory(filter = '', paymentStatus = '') {
+            try {
+                const response = await fetch(`/admin/booking?filter=${filter}&paymentStatus=${paymentStatus}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
                 });
-            });
-        } catch (error) {
-            bookingHistoryBody.innerHTML = `<tr><td colspan="6" class="text-danger">${error.message}</td></tr>`;
+
+                if (!response.ok)
+                    alert('Failed to fetch booking history');
+
+                const data = await response.json();
+                bookingHistoryBody.innerHTML = data.map(booking => `
+                <tr class="booking-row" data-booking-id="${booking.bookingID}">
+                    <td>${booking.bookingID}</td>
+                    <td>${booking.username}</td>
+                    <td>${booking.totalAmount}</td>
+                    <td>${booking.paymentMethod}</td>
+                    <td>${booking.paymentStatus}</td>
+                    <td>${convertToStandardTime(booking.bookingDateTime)}</td>
+                    <td>
+                        <button class="edit-btn btn btn-success btn-sm" data-id="${booking.bookingID}">Edit</button>
+                    </td>
+                </tr>
+            `).join('');
+
+                // Add click event listener to each row
+                document.querySelectorAll('.booking-row').forEach(row => {
+                    row.addEventListener('click', async (event) => {
+                        const bookingId = event.currentTarget.getAttribute('data-booking-id');
+                        await showBookingDetails(bookingId);
+                    });
+                });
+
+                // Add click event listener to each edit button
+                document.querySelectorAll('.edit-btn').forEach(button => {
+                    button.addEventListener('click', async (event) => {
+                        event.stopPropagation();
+                        const bookingId = event.currentTarget.getAttribute('data-id');
+                        await showEditForm(bookingId);
+                    });
+                });
+            } catch (error) {
+                bookingHistoryBody.innerHTML = `<tr><td colspan="7" class="text-danger">${error.message}</td></tr>`;
+            }
         }
+
+        document.getElementById('filter-button').addEventListener('click', () => {
+            const filterInput = document.getElementById('filter-input').value.trim();
+            const paymentStatus = document.getElementById('payment-status-filter').value;
+            fetchBookingHistory(filterInput, paymentStatus);
+        });
+
+        await fetchBookingHistory();
     });
 
     async function showBookingDetails(bookingId) {
@@ -181,6 +248,73 @@
 
         // Close the modal
         document.querySelector('.close').onclick = () => {
+            modal.style.display = "none";
+        };
+
+        window.onclick = (event) => {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        };
+    }
+
+    async function showEditForm(bookingId) {
+        const modal = document.getElementById("edit-booking-modal");
+        const form = document.getElementById("edit-booking-form");
+
+        try {
+            const response = await fetch(`/admin/booking/${bookingId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok)
+                throw new Error('Failed to fetch booking details');
+
+            const booking = await response.json();
+            document.getElementById("edit-username").value = booking.username;
+            document.getElementById("edit-total-amount").value = booking.totalAmount;
+            document.getElementById("edit-payment-method").value = booking.paymentMethod;
+            document.getElementById("edit-payment-status").value = booking.paymentStatus;
+            document.getElementById("edit-booking-date").value = new Date(booking.bookingDateTime).toISOString().slice(0, 16);
+
+            form.onsubmit = async (event) => {
+                event.preventDefault();
+
+                const updatedBooking = {
+                    username: document.getElementById("edit-username").value,
+                    totalAmount: document.getElementById("edit-total-amount").value,
+                    paymentMethod: document.getElementById("edit-payment-method").value,
+                    paymentStatus: document.getElementById("edit-payment-status").value,
+                    bookingDateTime: new Date(document.getElementById("edit-booking-date").value).toISOString(),
+                };
+
+                const updateResponse = await fetch(`/admin/booking/${bookingId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(updatedBooking),
+                });
+
+                if (updateResponse.ok) {
+                    alert('Booking updated successfully!');
+                    modal.style.display = "none";
+                    await fetchBookingHistory();
+                } else {
+                    alert('Error updating booking.');
+                }
+            };
+
+            modal.style.display = "block";
+        } catch (error) {
+            alert(error.message);
+        }
+
+        // Close the modal
+        document.querySelector('.close-edit').onclick = () => {
             modal.style.display = "none";
         };
 
