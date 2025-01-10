@@ -252,6 +252,7 @@ exports.vnpayIPN = async function (req, res, next) {
                             }, { transaction: t });
                         }
                     });
+                    const seatIdsData = seatsData.map(seat => seat.seatId);
                     fetch(`${baseUrl}/api/reserved/cancel`, {
                         method: 'POST',
                         headers: {
@@ -259,7 +260,7 @@ exports.vnpayIPN = async function (req, res, next) {
                         },
                         body: JSON.stringify({
                             showtimeId: showtimeId,
-                            seatIds: seatsData
+                            seatIds: seatIdsData
                         })
                     });
                     console.warn(`Payment failed for Booking ID: ${orderId} with Response Code: ${rspCode}`);
