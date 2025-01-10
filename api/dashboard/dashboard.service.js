@@ -9,7 +9,8 @@ exports.fetchTotalMovies = async () => {
 };
 
 exports.fetchTotalTickets = async () => {
-    return await Ticket.count();
+    // count bookingID where paymentStatus is Paid
+    return await Ticket.count( {where: {status: 'Booked'}});
 };
 
 exports.fetchTotalRevenue = async () => {

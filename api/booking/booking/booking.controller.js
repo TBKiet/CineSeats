@@ -21,14 +21,14 @@ exports.validateSeats = async (req, res, next) => {
         }
         const isValid = await validateSeatsService(showtimeId, seatIds);
         if (isValid) {
-            return res.status(200).json({
+            return res.json({
                 success: true,
                 message: 'All selected seats are available.',
                 showtimeId,
                 seatIds
             });
         } else {
-            return res.status(409).json({
+            return res.json({
                 success: false,
                 message: 'One or more selected seats are already booked.',
                 showtimeId,

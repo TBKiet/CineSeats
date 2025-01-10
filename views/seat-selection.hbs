@@ -209,6 +209,7 @@
                     const seatDiv = document.createElement('div');
                     seatDiv.classList.add('seat', seat.status);
                     seatDiv.setAttribute('data-seatId', seat.seatID);
+                    seatDiv.setAttribute('data-seat-price', seat.price);
                     if (seat.seatVisibility === 0) {
                         seatDiv.classList.add('invisible');
                     } else if (seat.seatVisibility) {
@@ -216,7 +217,7 @@
                         indexCount = 1;
                     }
 
-                    seatDiv.dataset.seatId = seat.seatID;
+                    //seatDiv.dataset.seatId = seat.seatID;
                     seatDiv.textContent = seat.seatNumber < 10
                         ? `${seat.rowLetter}0${seat.seatNumber}`
                         : `${seat.rowLetter}${seat.seatNumber}`;

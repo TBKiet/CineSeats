@@ -1,9 +1,9 @@
 const e = require('express');
 const { extractAvailableSeats } = require('./booking.service');
 exports.getSeatsJson = async (req, res) => {
-    if (!req.isAuthenticated()) {
-        res.redirect('/login');
-    }
+    // if (!req.isAuthenticated()) {
+    //     res.redirect('/login');
+    // }
     const { showtimeId } = req.body;
     console.log('showtimeId', showtimeId);
     const baseUrl = `${req.protocol}://${req.get('host')}`;

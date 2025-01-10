@@ -248,7 +248,7 @@ exports.vnpayIPN = async function (req, res, next) {
                                 showtimeId: showtimeId,
                                 seatId: seat.seatId,
                                 price: seat.seatPrice, // Adjust if dynamic
-                                status: 'Booked'
+                                status: 'Canceled'
                             }, { transaction: t });
                         }
                     });
