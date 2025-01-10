@@ -81,62 +81,37 @@
     document.addEventListener('DOMContentLoaded', async () => {
         const movieTableBody = document.querySelector('#movie-db tbody');
         const currentPageElement = document.querySelector('#current-page');
+        const totalPagesElement = document.createElement('span');
+        totalPagesElement.id = 'total-pages';
+        currentPageElement.parentNode.insertBefore(totalPagesElement, currentPageElement.nextSibling);
         let currentPage = 1;
 
-        // Debounce search input
-        let debounceTimer;
-        document.getElementById('filter-name').addEventListener('input', () => {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => fetchMovies(1), 300);
-        });
-
-        // Fetch movies with filters and sorting
         async function fetchMovies(page = 1) {
             try {
                 const filterName = document.getElementById('filter-name').value;
                 const filterGenre = document.getElementById('filter-genre').value;
                 const filterCountry = document.getElementById('filter-country').value;
-                const sortBy = document.getElementById('sort-by').value;
-                const sortOrder = document.getElementById('sort-order').value;
-
                 let query = `page=${page}`;
                 if (filterName) query += `&keyword=${filterName}`;
                 if (filterGenre !== 'all') query += `&genre=${filterGenre}`;
                 if (filterCountry !== 'all') query += `&country=${filterCountry}`;
-                if (sortBy !== 'none') query += `&sortBy=${sortBy}&sortOrder=${sortOrder}`;
-
                 const response = await fetch(`/api/movies?${query}`);
                 const data = await response.json();
 
                 populateTable(data.movies);
-
-                const genreSelect = document.getElementById('filter-genre');
-                genreSelect.innerHTML = '<option value="all">All Genre</option>';
-                data.genres.forEach((genre) => {
-                    const option = document.createElement('option');
-                    option.value = genre;
-                    option.textContent = genre;
-                    genreSelect.appendChild(option);
-                });
-
-                const countrySelect = document.getElementById('filter-country');
-                countrySelect.innerHTML = '<option value="all">All Country</option>';
-                data.countries.forEach((country) => {
-                    const option = document.createElement('option');
-                    option.value = country;
-                    option.textContent = country;
-                    countrySelect.appendChild(option);
-                });
-
                 currentPageElement.textContent = data.currentPage;
+                totalPagesElement.innerHTML = `/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${data.totalPages}`;
+
+                // Update button states
+                document.querySelector('#prev-page').disabled = currentPage <= 1;
+                document.querySelector('#next-page').disabled = currentPage >= data.totalPages;
             } catch (error) {
                 console.error('Error fetching movies:', error);
             }
         }
 
-        // Populate movie table with data
         function populateTable(movies) {
-            const fragment = document.createDocumentFragment();
+            movieTableBody.innerHTML = '';
             movies.forEach((movie) => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -147,24 +122,15 @@
                 <td>${new Date(movie.release_date).toLocaleDateString()}</td>
                 <td>${new Date(movie.end_date).toLocaleDateString()}</td>
                 <td>
-                    <button class="edit-btn btn btn-success btn-sm block-btn" data-id="${movie._id}">Edit</button>
-                    <button class="delete-btn btn btn-danger btn-sm" data-id="${movie._id}">Delete</button>
-
+                    <button class="edit-btn" data-id="${movie._id}">Edit</button>
+                    <button class="delete-btn" data-id="${movie._id}">Delete</button>
                 </td>
             `;
-                fragment.appendChild(row);
+                movieTableBody.appendChild(row);
             });
-            movieTableBody.innerHTML = '';
-            movieTableBody.appendChild(fragment);
             assignActionListeners();
         }
 
-        // Event listener for sort button
-        document.querySelector('#sort-button').addEventListener('click', () => {
-            fetchMovies(1);
-        });
-
-        // Event listener for pagination buttons
         document.querySelector('#prev-page').addEventListener('click', () => {
             if (currentPage > 1) {
                 currentPage--;
@@ -176,7 +142,6 @@
             currentPage++;
             fetchMovies(currentPage);
         });
-
 
         // Assign action listeners for Edit and Delete buttons
         const assignActionListeners = () => {
