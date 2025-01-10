@@ -122,8 +122,8 @@
                 <td>${new Date(movie.release_date).toLocaleDateString()}</td>
                 <td>${new Date(movie.end_date).toLocaleDateString()}</td>
                 <td>
-                    <button class="edit-btn" data-id="${movie._id}">Edit</button>
-                    <button class="delete-btn" data-id="${movie._id}">Delete</button>
+                    <button class="edit-btn btn btn-success btn-sm block-btn" data-id="${movie._id}">Edit</button>
+                    <button class="delete-btn btn btn-danger btn-sm" data-id="${movie._id}">Delete</button>
                 </td>
             `;
                 movieTableBody.appendChild(row);
