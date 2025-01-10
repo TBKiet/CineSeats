@@ -3,7 +3,7 @@ let querystring = require('qs');
 let crypto = require("crypto");
 const { v4: uuidv4 } = require('uuid');
 const { Booking, Ticket, sequelize } = require('../../api/booking/booking_model/index');
-const { redis, hsetAsync, delAsync, hgetallAsync } = require('../../config/redisConnection');
+const { redis} = require('../../config/redisConnection');
 function sortObject(obj) {
     let sorted = {};
     let str = [];
@@ -31,15 +31,14 @@ exports.createPaymentUrl = async function (req, res, next) {
     try {
         await sequelize.transaction(async (t) => {
             const username = req.user.username;
-            const { totalAmount, paymentMethod, selectedSeats, showtimeId } = req.body;
-            if (!username || !totalAmount || !paymentMethod || !selectedSeats || !showtimeId) {
+            const { totalAmount, paymentMethod, seatsData, showtimeId } = req.body;
+            if (!username || !totalAmount || !paymentMethod || !seatsData || !showtimeId) {
                 throw new Error('Missing required payment details.');
             }
             // Create a new booking record
             let date = new Date();
             let createDate = moment(date).format('YYYYMMDDHHmmss');
             const bookingId = generateBookingID();
-            console.log(bookingId);
             const booking = await Booking.create({
                 bookingID: bookingId,
                 username: username,
@@ -65,7 +64,7 @@ exports.createPaymentUrl = async function (req, res, next) {
             // Store booking details in Redis with a TTL (e.g., 5 minutes)
             await redis.hset(`booking:${bookingId}`, {
                 showtimeId: showtimeId,
-                selectedSeats: JSON.stringify(selectedSeats),
+                seatsData: JSON.stringify(seatsData),
             });
             await redis.expire(`booking:${bookingId}`, 300);
             let locale = 'vn';
@@ -93,7 +92,6 @@ exports.createPaymentUrl = async function (req, res, next) {
             let signed = hmac.update(new Buffer(signData, 'utf-8')).digest("hex");
             vnp_Params['vnp_SecureHash'] = signed;
             vnpUrl += '?' + querystring.stringify(vnp_Params, { encode: false });
-            console.log(vnpUrl);
             res.redirect(vnpUrl);
         });
     } catch (error) {
@@ -188,7 +186,6 @@ exports.vnpayIPN = async function (req, res, next) {
             // Step 7: Check if the amount matches
             let vnpAmount = parseInt(vnp_Params['vnp_Amount'], 10); // Amount in VND, e.g., 1000000
             let expectedAmount = parseInt(booking.totalAmount) * 100; // Assuming totalAmount is in thousand VND
-            console.log(vnpAmount, expectedAmount);
             let checkAmount = (vnpAmount === expectedAmount);
 
             if (!checkAmount) {
@@ -207,8 +204,7 @@ exports.vnpayIPN = async function (req, res, next) {
                     return res.status(404).send('Booking details not found.');
                 }
                 const showtimeId = bookingDetails.showtimeId;
-                const selectedSeats = JSON.parse(bookingDetails.selectedSeats);
-
+                const seatsData = JSON.parse(JSON.parse(bookingDetails.seatsData));
                 if (rspCode === "00") {
                     // Payment successful
                     paymentStatus = '1';
@@ -219,14 +215,14 @@ exports.vnpayIPN = async function (req, res, next) {
                         await booking.save({ transaction: t });
 
                         // Insert Ticket records
-                        for (const seat of selectedSeats) {
+                        for (const seat of seatsData) {
                             const ticketId = generateTicketID();
                             await Ticket.create({
                                 ticketID: ticketId,
                                 bookingId: orderId,
                                 showtimeId: showtimeId,
-                                seatId: seat,
-                                price: 50, // Adjust if dynamic
+                                seatId: seat.seatId,
+                                price: seat.seatPrice, // Adjust if dynamic
                                 status: 'Booked'
                             }, { transaction: t });
                         }
@@ -244,14 +240,14 @@ exports.vnpayIPN = async function (req, res, next) {
                         await booking.save({ transaction: t });
 
                         // Update associated tickets to 'Canceled'
-                        for (const seat of selectedSeats) {
+                        for (const seat of seatsData) {
                             const ticketId = generateTicketID();
                             await Ticket.create({
                                 ticketID: ticketId,
                                 bookingId: orderId,
                                 showtimeId: showtimeId,
-                                seatId: seat,
-                                price: 50, // Adjust if dynamic
+                                seatId: seat.seatId,
+                                price: seat.seatPrice, // Adjust if dynamic
                                 status: 'Booked'
                             }, { transaction: t });
                         }
@@ -263,7 +259,7 @@ exports.vnpayIPN = async function (req, res, next) {
                         },
                         body: JSON.stringify({
                             showtimeId: showtimeId,
-                            seatIds: selectedSeats
+                            seatIds: seatsData
                         })
                     });
                     console.warn(`Payment failed for Booking ID: ${orderId} with Response Code: ${rspCode}`);
