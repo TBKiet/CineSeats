@@ -363,9 +363,11 @@ const getTotalMoviesCount = async (req, res) => {
         res.status(500).send("Error fetching total movies");
     }
 };
-const getOrder = async (req, res) => {// Assuming user info is stored in `req.user`
+const getOrder = async (req, res) => {
     try {
-        const bookings = await Booking.findAll();
+        const bookings = await Booking.findAll({
+            order: [['BookingDateTime', 'DESC']] // Sort by creation time in descending order
+        });
         res.json(bookings);
     } catch (error) {
         console.error(error);

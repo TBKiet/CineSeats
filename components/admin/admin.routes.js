@@ -31,8 +31,8 @@ router.get("/account", renderAccount);
 router.get("/movie", renderMovie);
 
 router.get("/order", renderOrder);
-router.get("/orders", getOrder)
-router.get("/orders/:id", getOrder)
+router.get("/booking", getOrder)
+router.get("/booking/:id", getOrder)
 
 // API support account management
 router.delete('/users/:username', deleteUser);
