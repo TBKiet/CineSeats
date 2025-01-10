@@ -245,57 +245,57 @@
             document.getElementById("edit-movie-form").addEventListener("submit", async (event) => {
                 event.preventDefault();
 
-                const updateMovie = async (id) => {
-                    const updatedMovie = {
-                        name_vn: document.getElementById("name-vn").value,
-                        director: document.getElementById("director").value,
-                        actor: document.getElementById("actor").value,
-                        release_date: new Date(document.getElementById("release-date").value),
-                        country_name_vn: document.getElementById("country").value,
-                        genre: document.getElementById("genre").value.split(',').map(genre => genre.trim()),
-                        trailer: document.getElementById("trailer").value,
-                        ratings: document.getElementById("ratings").value,
-                        time: document.getElementById("time").value,
-                        brief_vn: document.getElementById("brief-vn").value,
-                    };
+                // Validate inputs
+                const name = document.getElementById("name-vn").value.trim();
+                const director = document.getElementById("director").value.trim();
+                const actor = document.getElementById("actor").value.trim();
+                const releaseDate = document.getElementById("release-date").value;
+                const country = document.getElementById("country").value.trim();
+                const genre = document.getElementById("genre").value.trim();
+                const trailer = document.getElementById("trailer").value.trim();
+                const ratings = document.getElementById("ratings").value.trim();
+                const time = document.getElementById("time").value;
+                const brief = document.getElementById("brief-vn").value.trim();
 
-                    const formData = new FormData();
-                    formData.append("name_vn", updatedMovie.name_vn);
-                    formData.append("director", updatedMovie.director);
-                    formData.append("actor", updatedMovie.actor);
-                    formData.append("release_date", updatedMovie.release_date);
-                    formData.append("country_name_vn", updatedMovie.country_name_vn);
-                    formData.append("genre", updatedMovie.genre);
-                    formData.append("trailer", updatedMovie.trailer);
-                    formData.append("ratings", updatedMovie.ratings);
-                    formData.append("time", updatedMovie.time);
-                    formData.append("brief_vn", updatedMovie.brief_vn);
-                    console.log(formData);
+                if (!name || !director || !actor || !releaseDate || !country || !genre || !trailer || !ratings || !time || !brief) {
+                    alert("All fields are required.");
+                    return;
+                }
 
-                    const movieImageInput = document.getElementById("movie-image");
-                    if (movieImageInput.files.length > 0) {
-                        formData.append("movieImage", movieImageInput.files[0]);
-                    }
+                // Proceed with form submission
+                const formData = new FormData();
+                formData.append("name_vn", name);
+                formData.append("director", director);
+                formData.append("actor", actor);
+                formData.append("release_date", releaseDate);
+                formData.append("country_name_vn", country);
+                formData.append("genre", genre);
+                formData.append("trailer", trailer);
+                formData.append("ratings", ratings);
+                formData.append("time", time);
+                formData.append("brief_vn", brief);
 
-                    const backgroundImageInput = document.getElementById("background-image");
-                    if (backgroundImageInput.files.length > 0) {
-                        formData.append("backgroundImage", backgroundImageInput.files[0]);
-                    }
+                const movieImageInput = document.getElementById("movie-image");
+                if (movieImageInput.files.length > 0) {
+                    formData.append("movieImage", movieImageInput.files[0]);
+                }
 
-                    const response = await fetch(`/admin/movies/${movie.id}`, {
-                        method: "PUT",
-                        body: formData
-                    });
+                const backgroundImageInput = document.getElementById("background-image");
+                if (backgroundImageInput.files.length > 0) {
+                    formData.append("backgroundImage", backgroundImageInput.files[0]);
+                }
 
-                    if (response.ok) {
-                        alert("Movie updated successfully!");
-                        location.reload();
-                    } else {
-                        alert("Error updating movie.");
-                    }
-                };
+                const response = await fetch(`/admin/movies/${movie.id}`, {
+                    method: "PUT",
+                    body: formData
+                });
 
-                updateMovie(movie.id);
+                if (response.ok) {
+                    alert("Movie updated successfully!");
+                    location.reload();
+                } else {
+                    alert("Error updating movie.");
+                }
             });
 
             // Cancel edit
@@ -385,20 +385,37 @@
             document.getElementById("add-movie-form").addEventListener("submit", async (event) => {
                 event.preventDefault();
 
+                // Validate inputs
+                const name = document.getElementById("name-vn").value.trim();
+                const director = document.getElementById("director").value.trim();
+                const actor = document.getElementById("actor").value.trim();
+                const releaseDate = document.getElementById("release-date").value;
+                const country = document.getElementById("country").value.trim();
+                const genre = document.getElementById("genre").value.trim();
+                const trailer = document.getElementById("trailer").value.trim();
+                const ratings = document.getElementById("ratings").value.trim();
+                const time = document.getElementById("time").value;
+                const brief = document.getElementById("brief-vn").value.trim();
+
+                if (!name || !director || !actor || !releaseDate || !country || !genre || !trailer || !ratings || !time || !brief) {
+                    alert("All fields are required.");
+                    return;
+                }
+
                 const formData = new FormData();
-                formData.append("name_vn", document.getElementById("name-vn").value);
-                formData.append("director", document.getElementById("director").value);
-                formData.append("actor", document.getElementById("actor").value);
-                formData.append("release_date", document.getElementById("release-date").value);
-                formData.append("country_name_vn", document.getElementById("country").value);
-                formData.append("genre", document.getElementById("genre").value);
-                formData.append("trailer", document.getElementById("trailer").value);
-                formData.append("ratings", document.getElementById("ratings").value);
-                formData.append("time", document.getElementById("time").value);
-                formData.append("brief_vn", document.getElementById("brief-vn").value);
+                formData.append("name_vn", name);
+                formData.append("director", director);
+                formData.append("actor", actor);
+                formData.append("release_date", releaseDate);
+                formData.append("country_name_vn", country);
+                formData.append("genre", genre);
+                formData.append("trailer", trailer);
+                formData.append("ratings", ratings);
+                formData.append("time", time);
+                formData.append("brief_vn", brief);
                 formData.append("movieImage", document.getElementById("movie-image").files[0]);
                 formData.append("backgroundImage", document.getElementById("background-image").files[0]);
-                console.log(formData);
+
                 try {
                     const response = await fetch('/admin/movies', {
                         method: 'POST',
@@ -407,7 +424,7 @@
 
                     if (response.ok) {
                         alert('Movie added successfully!');
-                        location.reload(); // Reload to display the updated table
+                        location.reload();
                     } else {
                         const error = await response.json();
                         alert(error.message || 'Error adding movie.');

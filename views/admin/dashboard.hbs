@@ -202,7 +202,9 @@
                 const response = await fetch(`/api/dashboard/revenue-report?timeRange=${timeRange}`); // API endpoint for revenue report
                 if (response.ok) {
                     const data = await response.json();
-                    updateRevenueReportChart(data);
+                    const labels = data.map(item => item.date);
+                    const revenue = data.map(item => item.revenue);
+                    updateRevenueReportChart(labels, revenue);
                 } else {
                     console.error('Failed to fetch revenue report');
                 }
@@ -212,9 +214,9 @@
         }
 
         // Function to update the revenue report chart
-        function updateRevenueReportChart(data) {
-            revenueReportChart.data.labels = data.labels;
-            revenueReportChart.data.datasets[0].data = data.revenue;
+        function updateRevenueReportChart(labels, revenue) {
+            revenueReportChart.data.labels = labels;
+            revenueReportChart.data.datasets[0].data = revenue;
             revenueReportChart.update();
         }
 
